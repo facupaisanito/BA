@@ -56,6 +56,7 @@ def ini_Update ():
     GENERAL['time'] = str(TIME)
     GENERAL['time_init'] = str(TIME_INIT)
     GENERAL['voltage'] = str(VOLTAGE)
+	
 
     for option in GENERAL:
         config.set('General',option,GENERAL[option])

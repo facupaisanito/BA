@@ -36,21 +36,21 @@ for px in sys.argv:
             sys.exit()
 
 #Setup
-umbralVoltHigh =    3800
-umbralVoltTarget =  3600
-umbralVoltLow =     3200
-umbralVolt =         100
-maxTimeInit =       10          # 20 seg
-maxTimeDischarge =  30 * 60     # 30 min
-maxTimeCharge =     1 * 60 * 60 # 1 hr
-maxTimeCond =       19          # 20 seg
-iCharge1 =          '1.5'
-vCharge1 =          '4.1'
-iCharge2 =          '0.5'
-vCharge2 =          '4.2'
-iDischarge1 =       '1.5'
-iDischarge2 =       '1.2'
-iDischarge3 =       '0.5'
+umbralVoltHigh =    	4000
+umbralVoltTarget =  	3800
+umbralVoltLow =     	3600
+umbralVolt =        	100
+maxTimeInit =       	10          # 10 seg
+maxTimeDischarge =  	30 * 60     # 30 min
+maxTimeCharge =     	1 * 60 * 60 # 1 hr
+maxTimeCond =       	9          # 10 seg
+iCharge1 =          	'1.5'
+vCharge1 =          	'4.1'
+iCharge2 =          	'0.5'
+vCharge2 =          	'4.2'
+iDischarge1 =       	'1.5'
+iDischarge2 =       	'1.3'
+iDischarge3 =       	'0.5'
 
 ################################################################
 ##########                  INIT                      ##########
@@ -93,7 +93,7 @@ def charge_state(number) :
         print "STOP"
         scriptSys.GUI['line1'] = "Analysis Stopped"
         scriptSys.GUI['line2'] = "Max time of CHARGE reached"
-        scriptSys.GUI['bgcolor'] = "244,0,0"
+        scriptSys.GUI['bgcolor'] = '"244,0,0"'
         scriptSys.GUI['extra_info'] = "This is scriptTest.py"
         scriptSys.ini_Update()
         sys.exit()
@@ -124,7 +124,7 @@ def discharge_state(number) :
         print "STOP"
         scriptSys.GUI['line1'] = "Analysis Stopped"
         scriptSys.GUI['line2'] = "Max time of DISCHARGE reached"
-        scriptSys.GUI['bgcolor'] = "244,0,0"
+        scriptSys.GUI['bgcolor'] = '"244,0,0"'
         scriptSys.GUI['extra_info'] = "This is scriptTest.py"
         scriptSys.ini_Update()
         sys.exit()
