@@ -265,7 +265,7 @@ def copy_report() :
             writer.writerows(dato)
         myFile.close()
     except:
-        print "el copy no funciono csv2"
+        print "Create /historal folder!!!"
     try:
         with open(PATH + STATION_N + ".ini", "rb") as ifile:
             reader = csv.reader(ifile)

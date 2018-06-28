@@ -42,7 +42,9 @@ umbralVoltLow =     	3600
 umbralVolt =        	100
 maxTimeInit =       	10          # 10 seg
 maxTimeDischarge =  	30 * 60     # 30 min
+minTimeDischarge =  	60
 maxTimeCharge =     	1 * 60 * 60 # 1 hr
+minTimeCharge =     	60
 maxTimeCond =       	9          # 10 seg
 iCharge1 =          	'1.5'
 vCharge1 =          	'4.1'
@@ -63,7 +65,8 @@ def init_state() :
             discharge_state(1)
             sys.exit()
 
-        if scriptSys.VOLTAGE < umbralVoltHigh and scriptSys.VOLTAGE > umbralVoltLow:
+        if scriptSys.VOLTAGE < umbralVoltHigh and \
+            scriptSys.VOLTAGE > umbralVoltLow:
             zmeasure_state()
             sys.exit()
     print "RUN"
@@ -74,7 +77,7 @@ def init_state() :
 ##########                  CHARGE                    ##########
 ################################################################
 def charge_state(number) :
-    if not scriptSys.GENERAL['mode'] == 'CHARGE' : #si es llamado por primera vez
+    if not scriptSys.GENERAL['mode'] == 'CHARGE' : #si es llamado por 1 vez
         scriptSys.GENERAL['mode'] = 'CHARGE'
         scriptSys.TIME_INIT = scriptSys.TIME
         if number == 1 : print "CHARGE,"+ vCharge1 +","+ iCharge1
@@ -83,7 +86,8 @@ def charge_state(number) :
         scriptSys.ini_Update()
         sys.exit()
 
-    if  scriptSys.VOLTAGE > (umbralVoltTarget + umbralVolt):
+    if  scriptSys.VOLTAGE > (umbralVoltTarget + umbralVolt) and \
+        (scriptSys.TIME - scriptSys.TIME_INIT) >= minTimeCharge:
         cond_state()
         sys.exit()
 
@@ -104,7 +108,7 @@ def charge_state(number) :
 ##########                  DISCHARGE                 ##########
 ################################################################
 def discharge_state(number) :
-    if not scriptSys.GENERAL['mode'] == 'DISCHARGE' : #si es llamado por primera vez
+    if not scriptSys.GENERAL['mode'] == 'DISCHARGE' : #si es llamado por 1 vez
         scriptSys.GENERAL['mode'] = 'DISCHARGE'
         scriptSys.TIME_INIT = scriptSys.TIME
         if number == 1 : print "DISCHARGE,"+ iDischarge1
@@ -117,7 +121,8 @@ def discharge_state(number) :
         cond_state()
         sys.exit()
 
-    if (int(scriptSys.TIME) - int(scriptSys.TIME_INIT)) >= maxTimeDischarge :
+    if (int(scriptSys.TIME) - int(scriptSys.TIME_INIT)) >= maxTimeDischarge \
+        and (scriptSys.TIME - scriptSys.TIME_INIT) >= minTimeDischarge:
         scriptSys.TIME_INIT = scriptSys.TIME
         scriptSys.GENERAL['mode']= "STOP"
         print "STOP"
@@ -135,7 +140,7 @@ def discharge_state(number) :
 ##########                  CONDITIONING               #########
 ################################################################
 def cond_state():
-    if not scriptSys.GENERAL['mode'] == 'CONDITIONING' : #si es llamado por primera vez
+    if not scriptSys.GENERAL['mode'] == 'CONDITIONING' : #es llamado por 1 vez
         scriptSys.GENERAL['mode'] = 'CONDITIONING'
         scriptSys.TIME_INIT = scriptSys.TIME
         print "PAUSE"
@@ -151,7 +156,8 @@ def cond_state():
             discharge_state(2)
             scriptSys.ini_Update()
             sys.exit()
-        if scriptSys.VOLTAGE < umbralVoltHigh and scriptSys.VOLTAGE > umbralVoltLow:
+        if scriptSys.VOLTAGE < umbralVoltHigh and \
+            scriptSys.VOLTAGE > umbralVoltLow:
             scriptInc.measure_z1()
             scriptSys.ini_Update()
             sys.exit()

@@ -117,12 +117,12 @@ def discharge_state(number) :
         scriptSys.ini_Update()
         sys.exit()
 
-    if scriptSys.VOLTAGE < (umbralVoltTarget - umbralVolt):
+    if scriptSys.VOLTAGE < (umbralVoltTarget - umbralVolt) \
+        and (scriptSys.TIME - scriptSys.TIME_INIT) >= minTimeDischarge:
         cond_state()
         sys.exit()
 
-    if (int(scriptSys.TIME) - int(scriptSys.TIME_INIT)) >= maxTimeDischarge \
-        and (scriptSys.TIME - scriptSys.TIME_INIT) >= minTimeDischarge:
+    if (int(scriptSys.TIME) - int(scriptSys.TIME_INIT)) >= maxTimeDischarge :
         scriptSys.TIME_INIT = scriptSys.TIME
         scriptSys.GENERAL['mode']= "STOP"
         print "STOP"
