@@ -56,7 +56,7 @@ def ini_Update ():
     GENERAL['time'] = str(TIME)
     GENERAL['time_init'] = str(TIME_INIT)
     GENERAL['voltage'] = str(VOLTAGE)
-	
+
 
     for option in GENERAL:
         config.set('General',option,GENERAL[option])
@@ -76,7 +76,7 @@ def import_data():
         f.readline()
         f.readline()
         reader = csv.DictReader(f, delimiter=',')
-
+        holes = 0
         for row in reader: data.append(row)
         for row in data:
             ind = data.index(row) + 1
@@ -86,6 +86,7 @@ def import_data():
             deltaI = int(data[ind]['CURRENT']) - int(row['CURRENT'])
             deltaT = int(data[ind]['TEMP']) - int(row['TEMP'])
             if delta > 1:
+                holes = holes + 1
                 dV=deltaV/delta
                 dI=deltaI/delta
                 dT=deltaT/delta
@@ -97,6 +98,7 @@ def import_data():
                 temp['CURRENT'] = str(int(row['CURRENT'])+dI)
                 temp['TEMP'] = str(int(row['TEMP'])+dT)
                 data.insert(ind,temp)
+    GENERAL['line_b'] = str(holes)
     return
 ################################################################
 ##########                  get_data                ##########
@@ -231,3 +233,53 @@ except:
     print "error con el csv"
     sys.exit()
     pass
+################################################################
+##########                  COPY REPORT              ##########
+################################################################
+
+#Setup
+#
+def copy_report() :
+    try:
+        with open(PATH + STATION_N + ".csv", "rb") as ifile:
+            ifile.readline()
+            name = ifile.readline()
+            name = name.replace(" ","_")
+            name = name.replace(",","_")
+            name = name.replace(".","")
+            name = name.replace(":","-")
+            name = name[:-12]
+            reader = csv.reader(ifile)
+            dato = []
+            for row in reader:
+                dato.append(row)
+        ifile.close()
+    except:
+        print "el copy no funciono csv1"
+    try:
+        myFile = open("historial/"+ name +".csv", 'w')
+        with myFile:
+            writer = csv.writer(myFile)
+            writer.writerows(dato)
+        myFile.close()
+    except:
+        print "el copy no funciono csv2"
+    try:
+        with open(PATH + STATION_N + ".ini", "rb") as ifile:
+            reader = csv.reader(ifile)
+            dato = []
+            for row in reader:
+                dato.append(row)
+        ifile.close()
+    except:
+        print "el copy no funciono csv1"
+    try:
+        myFile = open("historial/"+ name +".ini", 'w')
+        with myFile:
+            writer = csv.writer(myFile)
+            writer.writerows(dato)
+        myFile.close()
+    except:
+        print "el copy no funciono csv2"
+    #
+    return

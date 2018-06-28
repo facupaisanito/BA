@@ -10,7 +10,6 @@ try:
 except:
     print "import sys,os in scriptSys Not found!!"
     sys.exit()
-
 try:
     sys.argv.append('--Param-scriptSys')
     sys.argv.append(sys.argv[1])
@@ -37,35 +36,35 @@ for px in sys.argv:
             sys.exit()
 
 #Setup
-umbralVoltHigh =    3900
-umbralVoltTarget =  3600
-umbralVoltLow =     3200
-maxTimeInit =       20          # 20 seg
-maxTimeDischarge =  30 * 60     # 30 min
-maxTimeCharge =     1 * 60 * 60 # 1 hr
-maxTimeCond =       20          # 20 seg
-iCharge1 =          '1.5'
-vCharge1 =          '4.1'
-iCharge2 =          '0.5'
-vCharge2 =          '4.2'
-iDischarge1 =       '1.5'
-iDischarge2 =       '1.0'
-iDischarge3 =       '0.5'
-
+umbralVoltHigh =    	4000
+umbralVoltTarget =  	3800
+umbralVoltLow =     	3600
+umbralVolt =        	100
+maxTimeInit =       	10          # 10 seg
+maxTimeDischarge =  	30 * 60     # 30 min
+maxTimeCharge =     	1 * 60 * 60 # 1 hr
+maxTimeCond =       	9          # 10 seg
+iCharge1 =          	'1.5'
+vCharge1 =          	'4.1'
+iCharge2 =          	'0.5'
+vCharge2 =          	'4.2'
+iDischarge1 =       	'1.5'
+iDischarge2 =       	'1.3'
+iDischarge3 =       	'0.5'
 ################################################################
 ##########                  INIT                      ##########
 ################################################################
 def init_state() :
     if int(scriptSys.TIME) >= maxTimeInit :
-        if scriptSys.VOLTAGE < umbralVoltLow:
+        if scriptSys.VOLTAGE <= umbralVoltLow:
             charge_state(1)
             sys.exit()
-        if scriptSys.VOLTAGE > umbralVoltHigh:
+        if scriptSys.VOLTAGE >= umbralVoltHigh:
             discharge_state(1)
             sys.exit()
 
         if scriptSys.VOLTAGE < umbralVoltHigh and scriptSys.VOLTAGE > umbralVoltLow:
-            cond_state()
+            zmeasure_state()
             sys.exit()
     print "RUN"
     scriptSys.ini_Update()
@@ -83,17 +82,18 @@ def charge_state(number) :
         # if number == 3 : print "CHARGE,"+ vCharge3 +","+ iCharge3
         scriptSys.ini_Update()
         sys.exit()
-    if  scriptSys.VOLTAGE > umbralVoltTarget:
+
+    if  scriptSys.VOLTAGE > (umbralVoltTarget + umbralVolt):
         cond_state()
         sys.exit()
 
     if (int(scriptSys.TIME) - int(scriptSys.TIME_INIT)) >= maxTimeCharge :
         scriptSys.GENERAL['mode']= "STOP"
         print "STOP"
-        scriptSys.EVAL['line1'] = "Analysis Stopped"
-        scriptSys.EVAL['line2'] = "Max time of CHARGE reached"
-        scriptSys.EVAL['bgcolor'] = "244,0,0"
-        scriptSys.EVAL['extra_info'] = "This is scriptTest.py"
+        scriptSys.GUI['line1'] = "Analysis Stopped"
+        scriptSys.GUI['line2'] = "Max time of CHARGE reached"
+        scriptSys.GUI['bgcolor'] = '"244,0,0"'
+        scriptSys.GUI['extra_info'] = "This is scriptTest.py"
         scriptSys.ini_Update()
         sys.exit()
     print "RUN"
@@ -112,7 +112,8 @@ def discharge_state(number) :
         if number == 3 : print "DISCHARGE,"+ iDischarge3
         scriptSys.ini_Update()
         sys.exit()
-    if scriptSys.VOLTAGE < umbralVoltTarget:
+
+    if scriptSys.VOLTAGE < (umbralVoltTarget - umbralVolt):
         cond_state()
         sys.exit()
 
@@ -120,10 +121,10 @@ def discharge_state(number) :
         scriptSys.TIME_INIT = scriptSys.TIME
         scriptSys.GENERAL['mode']= "STOP"
         print "STOP"
-        scriptSys.EVAL['line1'] = "Analysis Stopped"
-        scriptSys.EVAL['line2'] = "Max time of DISCHARGE reached"
-        scriptSys.EVAL['bgcolor'] = "244,0,0"
-        scriptSys.EVAL['extra_info'] = "This is scriptTest.py"
+        scriptSys.GUI['line1'] = "Analysis Stopped"
+        scriptSys.GUI['line2'] = "Max time of DISCHARGE reached"
+        scriptSys.GUI['bgcolor'] = '"244,0,0"'
+        scriptSys.GUI['extra_info'] = "This is scriptTest.py"
         scriptSys.ini_Update()
         sys.exit()
     print "RUN"
@@ -140,6 +141,7 @@ def cond_state():
         print "PAUSE"
         scriptSys.ini_Update()
         sys.exit()
+
     if  ((scriptSys.TIME) - (scriptSys.TIME_INIT)) >= maxTimeCond:
         if scriptSys.VOLTAGE < umbralVoltLow:
             charge_state(2)
@@ -190,6 +192,7 @@ def end_state():
     scriptSys.GENERAL['mode']= "STOP"
     scriptSys.TIME_INIT = scriptSys.TIME
     print "STOP"
+    # scriptSys.copy_report()
     scriptSys.ini_Update()
     sys.exit()
     return

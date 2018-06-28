@@ -51,7 +51,6 @@ vCharge2 =          	'4.2'
 iDischarge1 =       	'1.5'
 iDischarge2 =       	'1.3'
 iDischarge3 =       	'0.5'
-
 ################################################################
 ##########                  INIT                      ##########
 ################################################################
@@ -193,6 +192,7 @@ def end_state():
     scriptSys.GENERAL['mode']= "STOP"
     scriptSys.TIME_INIT = scriptSys.TIME
     print "STOP"
+    # scriptSys.copy_report()
     scriptSys.ini_Update()
     sys.exit()
     return

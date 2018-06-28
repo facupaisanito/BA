@@ -60,18 +60,19 @@ def get_line(dType, tLapse):
 ##########                  measure_z1                ##########
 ################################################################
 #Setup
-tTest1  =   9  #tiempo de descarga suave
-tTest2  =   19  #tiempo de descarga fuerte
-tTest3  =   19  #tiempo de recuperacion
+tTest1  =   8  #tiempo de descarga suave
+tTest2  =   28  #tiempo de descarga fuerte
+tTest3  =   8  #tiempo de recuperacion
 tTest4  =   20  #tiempo de chequeo e incio de sig etapa
 tTest5  =   20
+tMargin =   5   #margen de tiempo por no ser 10s exactos
 voltageAverage = 3
 currentAverage = 5
 Z1 = 0
 Z2 = 0
-tTestA  =   9
-tTestB  =   27
-tTestC  =   36
+tTestA  =   tTest1
+tTestB  =   tTest1 + tTest2
+tTestC  =   tTest1 + tTest2 + tTest3
 #
 def measure_z1() :
     if scriptSys.GENERAL['mode'] != 'Z_MEASURE' : #si es llamado por primera vez
@@ -87,7 +88,7 @@ def measure_z1() :
         # stress_test()
         return
 
-    if  actual_time >= tTestB  and  actual_time < (tTestB + 5) :
+    if  actual_time >= tTestB  and  actual_time < (tTestB + tMargin) :
         # print "DISCHARGE,1.0"  Descarga fuerte
         scriptSys.import_data()
         t = scriptSys.TIME_INIT + tTest1 + 2 #delay en el inicio de la descarga
@@ -104,7 +105,7 @@ def measure_z1() :
         print "PAUSE"
         return
 
-    if  actual_time >= tTestA  and  actual_time < (tTestA + 5) :
+    if  actual_time >= tTestA  and  actual_time < (tTestA + tMargin) :
         # print "DISCHARGE,0.2"  Descarga suave
         scriptSys.import_data()
         t = scriptSys.TIME_INIT + 2 #delay en el inicio de la descarga
@@ -161,22 +162,7 @@ def stress_test() :
     if  actual_time >= (tStress)                and  actual_time < (tStress + tRest):
         print "PAUSE"
     return
-################################################################
-##########                  COPY REPORT              ##########
-################################################################
 
-#Setup
-#
-def copy_report() :
-    try:
-        with open(PATH + STATION_N + ".csv",'rb') as f:
-            f.readline()
-            name = f.readline()
-            os.system('copy '+PATH + STATION_N + ".csv" 'bkp/'+name+'.csv')
-            os.system('copy '+PATH + STATION_N + ".ini" 'bkp/'+name+'.ini')
-    except:
-        print "el copy no funciono"
-    return
 ################################################################
 ##########                  FINAL REPORT              ##########
 ################################################################
@@ -191,6 +177,9 @@ def final_report() :
 
     scriptSys.GUI['line1'] = "Analysis Finished"
     scriptSys.GUI['line2'] = "Health: ---    Internal Z: " + str(scriptSys.EVAL['int_z']) + "mOhm"
-    scriptSys.GUI['bgcolor'] = "120,244,183"
-    scriptSys.GUI['extra_info'] = "This is scriptTest.py"
+    scriptSys.GUI['bgcolor'] = '"120,244,183"'
+    scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1']+" Z2="+scriptSys.EVAL['int_z2']
+    scriptSys.ini_Update()
+    scriptSys.copy_report()
+    sys.exit()
     return

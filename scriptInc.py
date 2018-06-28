@@ -60,13 +60,14 @@ def get_line(dType, tLapse):
 ##########                  measure_z1                ##########
 ################################################################
 #Setup
-tTest1  =   10  #tiempo de descarga suave
-tTest2  =   20  #tiempo de descarga fuerte
-tTest3  =   20  #tiempo de recuperacion
+tTest1  =   8  #tiempo de descarga suave
+tTest2  =   28  #tiempo de descarga fuerte
+tTest3  =   8  #tiempo de recuperacion
 tTest4  =   20  #tiempo de chequeo e incio de sig etapa
 tTest5  =   20
+tMargin =   5   #margen de tiempo por no ser 10s exactos
 voltageAverage = 3
-currentAverage = 10
+currentAverage = 5
 Z1 = 0
 Z2 = 0
 tTestA  =   tTest1
@@ -79,47 +80,45 @@ def measure_z1() :
         scriptSys.TIME_INIT = scriptSys.TIME
         print "DISCHARGE,0.2"
         return
+
     actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
     if  actual_time >= tTestC :
         # deja reposar y chequea q no caiga la tension
-        scriptSys.import_data() #levanto todo el archivo solo cuando lo necesito
-        t = scriptSys.TIME_INIT + tTest1 + tTest2
-        var = scriptSys.get_data('VOLTAGE', range( t , t + voltageAverage))
-        # chequear rectas
-        stress_test()
+        final_report()
+        # stress_test()
         return
-    elif  actual_time >= tTestB  and  actual_time < tTestC :
-        # print "DISCHARGE,1.0"   Descarga fuerte
+
+    if  actual_time >= tTestB  and  actual_time < (tTestB + tMargin) :
+        # print "DISCHARGE,1.0"  Descarga fuerte
         scriptSys.import_data()
-        t = scriptSys.TIME_INIT + tTest1
+        t = scriptSys.TIME_INIT + tTest1 + 2 #delay en el inicio de la descarga
         var = scriptSys.get_data('VOLTAGE', range( t , t + voltageAverage))
         V1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
-        var = scriptSys.get_data('VOLTAGE', range( t + tTest2, t+ tTest2 + voltageAverage))
+        var = scriptSys.get_data('VOLTAGE', range( scriptSys.TIME - voltageAverage, scriptSys.TIME ))
         V2 = sum(var) / float(len(var)) #promedio de las mediciones al final del test
-        var = scriptSys.get_data('CURRENT', range( t, t + currentAverage))
+        var = scriptSys.get_data('CURRENT', range(scriptSys.TIME - currentAverage,scriptSys.TIME))
         I1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
-        Z2 = abs((float(V2-V1)/float(I1))*1000)
-        scriptSys.EVAL['int_z2'] = str(round(Z2,3))
-        if scriptSys.DEBUG_MODE: print scriptSys.EVAL['int_z2']
+        Z2 = int((float(V2-V1)/float(I1))*1000)
+        scriptSys.EVAL['int_z2'] = str(Z2)
+        scriptSys.EVAL['int_z'] =   str(Z2) #str(round(Z1,0))
         # chequear rectas
-        print "RUN"
+        print "PAUSE"
         return
-    elif  actual_time >= tTestA  and  actual_time < tTestB :
+
+    if  actual_time >= tTestA  and  actual_time < (tTestA + tMargin) :
         # print "DISCHARGE,0.2"  Descarga suave
         scriptSys.import_data()
-        t = scriptSys.TIME_INIT
+        t = scriptSys.TIME_INIT + 2 #delay en el inicio de la descarga
         var = scriptSys.get_data('VOLTAGE', range( t , t + voltageAverage))
         V1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
-        var = scriptSys.get_data('VOLTAGE', range( t + tTest1, t+ tTest1 + voltageAverage))
+        var = scriptSys.get_data('VOLTAGE', range( scriptSys.TIME - voltageAverage, scriptSys.TIME ))
         V2 = sum(var) / float(len(var)) #promedio de las mediciones al final del test
-        var = scriptSys.get_data('CURRENT', range( t, t + currentAverage))
+        var = scriptSys.get_data('CURRENT', range( scriptSys.TIME - currentAverage,scriptSys.TIME))
         I1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
-        Z1 = abs((float(V2-V1)/float(I1))*1000)
-        scriptSys.EVAL['int_z1'] = str(round(Z1,3))
-        scriptSys.EVAL['int_z'] = str(int(Z1))
+        Z1 = int((float(V2-V1)/float(I1))*1000)
+        scriptSys.EVAL['int_z1'] =  str(Z1) #str(round(Z1,3))
         # chequear rectas
-        if scriptSys.DEBUG_MODE: print scriptSys.EVAL['int_z1']
-
+        if scriptSys.DEBUG_MODE: print scriptSy
         print "DISCHARGE,1.0"
         return
     print "RUN"
@@ -129,8 +128,8 @@ def measure_z1() :
 ################################################################
 
 #Setup
-tStress =   10  #tiempo de descarga suave
-tRest   =   10  #tiempo de descarga fuerte
+tStress =   9  #tiempo de descarga suave
+tRest   =   9  #tiempo de descarga fuerte
 
 #
 def stress_test() :
@@ -163,6 +162,7 @@ def stress_test() :
     if  actual_time >= (tStress)                and  actual_time < (tStress + tRest):
         print "PAUSE"
     return
+
 ################################################################
 ##########                  FINAL REPORT              ##########
 ################################################################
@@ -173,11 +173,13 @@ def final_report() :
     if scriptSys.GENERAL['mode'] != 'END' : #si es llamado por primera vez
         scriptSys.GENERAL['mode'] = 'END'
         scriptSys.TIME_INIT = scriptSys.TIME
-        print "STOP,DCC,0,"+ scriptSys.EVAL['int_z1']
+        print "STOP,NTF,75,"+ scriptSys.EVAL['int_z']
 
-    scriptSys.EVAL['line1'] = "Analysis Finished"
-    scriptSys.EVAL['line2'] = "Health: ---    Internal Z: " + str(1) + "mOhm"
-    scriptSys.EVAL['bgcolor'] = "244,123,183"
-    scriptSys.EVAL['extra_info'] = "This is scriptTest2.py"
-
+    scriptSys.GUI['line1'] = "Analysis Finished"
+    scriptSys.GUI['line2'] = "Health: ---    Internal Z: " + str(scriptSys.EVAL['int_z']) + "mOhm"
+    scriptSys.GUI['bgcolor'] = '"120,244,183"'
+    scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1']+" Z2="+scriptSys.EVAL['int_z2']
+    scriptSys.ini_Update()
+    scriptSys.copy_report()
+    sys.exit()
     return
