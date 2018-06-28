@@ -205,8 +205,10 @@ try:
             voltage += int(last3lines[2]['VOLTAGE'])
             VOLTAGE = voltage/3
             TIME = int(last3lines[2]['TIME'])
-            GENERAL['voltage'] = str(voltage/3)     #tension instantanea (en promedio de las ultimas 3 mediciones)
-            GENERAL['time'] = last3lines[2]['TIME'] #tiempo en seg de la ultima vez q se tomo registro
+            GENERAL['voltage'] = str(voltage/3)
+            #tension instantanea (en promedio de las ultimas 3 mediciones)
+            GENERAL['time'] = last3lines[2]['TIME']
+            #tiempo en seg de la ultima vez q se tomo registro
         except :
             VOLTAGE = 0
             TIME = 0
