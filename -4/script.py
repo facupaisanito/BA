@@ -4,18 +4,23 @@ import plotly.graph_objs as go
 import numpy as np   # So we can use random numbers in examples
 import csv
 import sys
+from plotly import tools
+import plotly.plotly as py
+import plotly.graph_objs as go
 ############################################
 PLOT_DOT = False
 ############################################
 layout = dict(
-title='Time series with range slider and selectors',
+title='Plotter CSV',
 xaxis=dict(),
 yaxis=dict()
 )
-#---------------------------------------------------------------------------------------
+#--------------------------------------------------
 data = []
 info = []
+VISIBLE = True
 path = "../../historial/*.csv"
+fig = tools.make_subplots(rows=2, cols=1, subplot_titles=('Current', 'Voltage'), )
 for fname in glob.glob(path):
     # print(fname)
     with open(fname,'rb') as f:
@@ -49,20 +54,34 @@ for fname in glob.glob(path):
         reader = csv.DictReader(f, delimiter=',')
         header = reader.fieldnames
         listax = []
-        listay = []
+        listay_i = []
+        listay_v = []
         for row in data:
             listax.append(row["TIME"])
-            listay.append(row["CURRENT"])
+            listay_i.append(row["CURRENT"])
+            listay_v.append(row["VOLTAGE"])
         data = []
         fname = fname[:-8]
         fname = fname[16:]
-        trace = go.Scatter(
+
+        trace_i = go.Scatter(
         x = listax,
-        y = listay,
+        y = listay_i,
         mode = 'lines',
-        name = fname.decode('utf-8', 'ignore')
+        name = "I :" + fname.decode('utf-8', 'ignore'),
+        visible = VISIBLE
         )
-        info.append(trace)
+        trace_v = go.Scatter(
+        x = listax,
+        y = listay_v,
+        mode = 'lines',
+        name = "V :" + fname.decode('utf-8', 'ignore'),
+        visible = VISIBLE
+        )
+        # VISIBLE = False
+        fig.append_trace(trace_i, 1, 1)
+        fig.append_trace(trace_v, 2, 1)
+        # info.append(trace)
         if PLOT_DOT :
             dot_trace = go.Scatter(
             x = dot_listax,
@@ -71,9 +90,17 @@ for fname in glob.glob(path):
             name = fname.decode('utf-8', 'ignore') + "_dot"
             )
             info.append(dot_trace)
+plotly.offline.plot(fig)
 
-plotly.offline.plot({"data": info,"layout": layout})
+# plotly.offline.plot({"data": info,"layout": layout})
 
+
+
+#
+# from plotly import tools
+# import plotly.plotly as py
+# import plotly.graph_objs as go
+#
 # trace1 = go.Scatter(
 #     x=[0, 1, 2],
 #     y=[10, 11, 12]
@@ -86,16 +113,10 @@ plotly.offline.plot({"data": info,"layout": layout})
 #     x=[3, 4, 5],
 #     y=[1000, 1100, 1200],
 # )
-# fig = tools.make_subplots(rows=3, cols=1, specs=[[{}], [{}], [{}]],
-#                           shared_xaxes=True, shared_yaxes=True,
-#                           vertical_spacing=0.001)
-# fig.append_trace(trace1, 3, 1)
-# fig.append_trace(trace2, 2, 1)
+#
+# fig = tools.make_subplots(rows=2, cols=1)
+#
 # fig.append_trace(trace3, 1, 1)
+# fig.append_trace(trace2, 2, 1)
 #
-# fig['layout'].update(height=600, width=600, title='Stacked Subplots with Shared X-Axes')
-#
-#
-# app.layout = html.Div([
-#     dcc.Graph(figure=fig, id='my-figure')
-# ])
+# plotly.offline.plot(fig)
