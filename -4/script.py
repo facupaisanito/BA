@@ -8,7 +8,8 @@ from plotly import tools
 import plotly.plotly as py
 import plotly.graph_objs as go
 ############################################
-PLOT_DOT = False
+# PLOT_DOT = False
+PLOT_DOT = True
 ############################################
 layout = dict(
 title='Plotter CSV',
@@ -20,7 +21,8 @@ data = []
 info = []
 VISIBLE = True
 path = "../../historial/*.csv"
-fig = tools.make_subplots(rows=2, cols=1, subplot_titles=('Current', 'Voltage'), )
+fig = tools.make_subplots(rows=2, cols=1, subplot_titles=('Current', 'Voltage'),
+shared_xaxes=True , vertical_spacing=0.02 )
 for fname in glob.glob(path):
     # print(fname)
     with open(fname,'rb') as f:
@@ -89,8 +91,9 @@ for fname in glob.glob(path):
             mode = 'markers',
             name = fname.decode('utf-8', 'ignore') + "_dot"
             )
-            info.append(dot_trace)
-plotly.offline.plot(fig)
+            fig.append_trace(dot_trace, 1, 1)
+config = {'scrollZoom': True, 'displayModeBar': True}
+plotly.offline.plot(fig, config = config)
 
 # plotly.offline.plot({"data": info,"layout": layout})
 
