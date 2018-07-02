@@ -20,7 +20,8 @@ yaxis=dict()
 data = []
 info = []
 VISIBLE = True
-path = "../../historial/*.csv"
+path = "*.csv"
+# path = "../../historial/*.csv"
 fig = tools.make_subplots(rows=2, cols=1, subplot_titles=('Current', 'Voltage'),
 shared_xaxes=True , vertical_spacing=0.02 )
 for fname in glob.glob(path):
