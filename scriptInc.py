@@ -60,9 +60,9 @@ def get_line(dType, tLapse):
 ##########                  measure_z1                ##########
 ################################################################
 #Setup
-tTest1  =   8  #tiempo de descarga suave
-tTest2  =   28  #tiempo de descarga fuerte
-tTest3  =   8  #tiempo de recuperacion
+tTest1  =   28  #tiempo de descarga suave
+tTest2  =   58  #tiempo de descarga fuerte
+tTest3  =   58  #tiempo de recuperacion
 tTest4  =   20  #tiempo de chequeo e incio de sig etapa
 tTest5  =   20
 tMargin =   5   #margen de tiempo por no ser 10s exactos
@@ -73,22 +73,23 @@ Z2 = 0
 tTestA  =   tTest1
 tTestB  =   tTest1 + tTest2
 tTestC  =   tTest1 + tTest2 + tTest3
+tTestD  =   tTest1 + tTest2 + tTest3 + tTest4
 #
 def measure_z1() :
     if scriptSys.GENERAL['mode'] != 'Z_MEASURE' : #si es llamado por primera vez
         scriptSys.GENERAL['mode'] = 'Z_MEASURE'
         scriptSys.TIME_INIT = scriptSys.TIME
-        print "DISCHARGE,0.2"
+        print "DISCHARGE,1.0"
         return
 
     actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
-    if  actual_time >= tTestC :
+    if  actual_time >= tTestD :
         # deja reposar y chequea q no caiga la tension
         final_report()
         # stress_test()
         return
 
-    if  actual_time >= tTestB  and  actual_time < (tTestB + tMargin) :
+    if  actual_time >= tTestC  and  actual_time < (tTestC + tMargin) :
         # print "DISCHARGE,1.0"  Descarga fuerte
         scriptSys.import_data()
         t = scriptSys.TIME_INIT + tTest1 + 2 #delay en el inicio de la descarga
@@ -98,11 +99,17 @@ def measure_z1() :
         V2 = sum(var) / float(len(var)) #promedio de las mediciones al final del test
         var = scriptSys.get_data('CURRENT', range(scriptSys.TIME - currentAverage,scriptSys.TIME))
         I1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
-        Z2 = int((float(V2-V1)/float(I1))*1000)
+        Z2 = int((float(V2)/float(I1))*1000)
         scriptSys.EVAL['int_z2'] = str(Z2)
         scriptSys.EVAL['int_z'] =   str(Z2) #str(round(Z1,0))
         # chequear rectas
         print "PAUSE"
+        return
+
+    if  actual_time >= tTestB  and  actual_time < (tTestB + tMargin) :
+        # deja reposar y chequea q no caiga la tension
+        # stress_test()
+        print "DISCHARGE,1.5"
         return
 
     if  actual_time >= tTestA  and  actual_time < (tTestA + tMargin) :
@@ -115,11 +122,10 @@ def measure_z1() :
         V2 = sum(var) / float(len(var)) #promedio de las mediciones al final del test
         var = scriptSys.get_data('CURRENT', range( scriptSys.TIME - currentAverage,scriptSys.TIME))
         I1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
-        Z1 = int((float(V2-V1)/float(I1))*1000)
+        Z1 = int((float(V2)/float(I1))*1000)
         scriptSys.EVAL['int_z1'] =  str(Z1) #str(round(Z1,3))
         # chequear rectas
-        if scriptSys.DEBUG_MODE: print scriptSy
-        print "DISCHARGE,1.0"
+        print "PAUSE"
         return
     print "RUN"
     return

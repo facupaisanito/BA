@@ -50,7 +50,7 @@ iCharge1 =          	'1.5'
 vCharge1 =          	'4.1'
 iCharge2 =          	'0.5'
 vCharge2 =          	'4.2'
-iDischarge1 =       	'1.5'
+iDischarge1 =       	'1.8'
 iDischarge2 =       	'1.3'
 iDischarge3 =       	'0.5'
 ################################################################

@@ -83,13 +83,13 @@ def measure_z1() :
         return
 
     actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
-    if  actual_time >= tTestC :
+    if  actual_time >= tTestD :
         # deja reposar y chequea q no caiga la tension
         final_report()
         # stress_test()
         return
 
-    if  actual_time >= tTestB  and  actual_time < (tTestB + tMargin) :
+    if  actual_time >= tTestC  and  actual_time < (tTestC + tMargin) :
         # print "DISCHARGE,1.0"  Descarga fuerte
         scriptSys.import_data()
         t = scriptSys.TIME_INIT + tTest1 + 2 #delay en el inicio de la descarga
@@ -106,7 +106,7 @@ def measure_z1() :
         print "PAUSE"
         return
 
-    if  if  actual_time >= tTestB  and  actual_time < (tTestB + tMargin) :
+    if  actual_time >= tTestB  and  actual_time < (tTestB + tMargin) :
         # deja reposar y chequea q no caiga la tension
         # stress_test()
         print "DISCHARGE,1.5"
