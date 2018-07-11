@@ -60,16 +60,16 @@ def get_line(dType, tLapse):
 ##########                  measure_z1                ##########
 ################################################################
 #Setup
-tTest1  =   28  #tiempo de descarga suave
-tTest2  =   58  #tiempo de descarga fuerte
-tTest3  =   58  #tiempo de recuperacion
+tTest1  =   30  #tiempo de descarga suave
+tTest2  =   60  #tiempo de descarga fuerte
+tTest3  =   60  #tiempo de recuperacion
 tTest4  =   20  #tiempo de chequeo e incio de sig etapa
 tTest5  =   20
-tMargin =   5   #margen de tiempo por no ser 10s exactos
-voltageAverage = 3
-currentAverage = 5
-Z1 = 0
-Z2 = 0
+tMargin =   3   #margen de tiempo por no ser 10s exactos
+# voltageAverage = 3
+# currentAverage = 5
+# Z1 = 0
+# Z2 = 0
 tTestA  =   tTest1
 tTestB  =   tTest1 + tTest2
 tTestC  =   tTest1 + tTest2 + tTest3
@@ -79,50 +79,125 @@ def measure_z1() :
     if scriptSys.GENERAL['mode'] != 'Z_MEASURE' : #si es llamado por primera vez
         scriptSys.GENERAL['mode'] = 'Z_MEASURE'
         scriptSys.TIME_INIT = scriptSys.TIME
-        print "DISCHARGE,1.0"
+        print "DISCHARGE,0.6"
         return
 
     actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
     if  actual_time >= tTestD :
         # deja reposar y chequea q no caiga la tension
-        final_report()
+        # final_report()
         # stress_test()
+        measure_z2()
         return
 
-    if  actual_time >= tTestC  and  actual_time < (tTestC + tMargin) :
+    if  actual_time >= (tTestC - tMargin)  and  actual_time < (tTestC + tMargin) :
+        # print "DISCHARGE,1.0"  Descarga fuerte
+        # scriptSys.import_data()
+        # t = scriptSys.TIME_INIT + tTest1 + 2 #delay en el inicio de la descarga
+        # var = scriptSys.get_data('VOLTAGE', range( t , t + voltageAverage))
+        # V1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
+        # var = scriptSys.get_data('VOLTAGE', range( scriptSys.TIME - voltageAverage, scriptSys.TIME ))
+        # V2 = sum(var) / float(len(var)) #promedio de las mediciones al final del test
+        # var = scriptSys.get_data('CURRENT', range(scriptSys.TIME - currentAverage,scriptSys.TIME))
+        # I1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
+        # Z2 = int((float(V2)/float(I1))*1000)
+        # scriptSys.EVAL['int_z2'] = str(Z2)
+        # scriptSys.EVAL['int_z'] =   str(Z2) #str(round(Z1,0))
+        # chequear rectas
+        print "PAUSE"
+        return
+
+    if  actual_time >= (tTestB - tMargin)  and  actual_time < (tTestB + tMargin) :
+        # deja reposar y chequea q no caiga la tension
+        # stress_test()
+        print "PAUSE"
+        return
+
+    if  actual_time >= (tTestA - tMargin)  and  actual_time < (tTestA + tMargin) :
+        # print "DISCHARGE,0.2"  Descarga suave
+        # scriptSys.import_data()
+        # t = scriptSys.TIME_INIT + 2 #delay en el inicio de la descarga
+        # var = scriptSys.get_data('VOLTAGE', range( t , t + voltageAverage))
+        # V1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
+        # var = scriptSys.get_data('VOLTAGE', range( scriptSys.TIME - voltageAverage, scriptSys.TIME ))
+        # V2 = sum(var) / float(len(var)) #promedio de las mediciones al final del test
+        # var = scriptSys.get_data('CURRENT', range( scriptSys.TIME - currentAverage,scriptSys.TIME))
+        # I1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
+        # Z1 = int((float(V2)/float(I1))*1000)
+        # scriptSys.EVAL['int_z1'] =  str(Z1) #str(round(Z1,3))
+        # chequear rectas
+        print "DISCHARGE,1.2"
+        return
+    print "RUN"
+    return
+################################################################
+##########                  measure_z2                ##########
+################################################################
+#Setup
+tTest12  =   30  #tiempo de descarga suave
+tTest22  =   60  #tiempo de descarga fuerte
+tTest32  =   60  #tiempo de recuperacion
+tTest42  =   20  #tiempo de chequeo e incio de sig etapa
+tTest52  =   20
+# tMargin =   5   #margen de tiempo por no ser 10s exactos
+voltageAverage = 3
+currentAverage = 5
+Z1 = 0
+Z2 = 0
+tTestA2  =   tTest12
+tTestB2  =   tTest12 + tTest22
+tTestC2  =   tTest12 + tTest22 + tTest32
+tTestD2  =   tTest12 + tTest22 + tTest32 + tTest42
+#
+def measure_z2() :
+    if scriptSys.GENERAL['mode'] != 'Z_MEASURE2' : #si es llamado por primera vez
+        scriptSys.GENERAL['mode'] = 'Z_MEASURE2'
+        scriptSys.TIME_INIT = scriptSys.TIME
+        print "DISCHARGE,1.0"
+        return
+
+    actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
+    if  actual_time >= tTestD2 :
+        # deja reposar y chequea q no caiga la tension
+        # final_report()
+        stress_test()
+        return
+
+    if  actual_time >= (tTestC2 - tMargin)  and  actual_time < (tTestC2 + tMargin) :
         # print "DISCHARGE,1.0"  Descarga fuerte
         scriptSys.import_data()
-        t = scriptSys.TIME_INIT + tTest1 + 2 #delay en el inicio de la descarga
-        var = scriptSys.get_data('VOLTAGE', range( t , t + voltageAverage))
+        t = scriptSys.TIME_INIT + tTestB2 + 2 #delay en el inicio de la descarga
+        var = scriptSys.get_data('VOLTAGE', range( t - 5 , t - 5 + voltageAverage))
         V1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
         var = scriptSys.get_data('VOLTAGE', range( scriptSys.TIME - voltageAverage, scriptSys.TIME ))
         V2 = sum(var) / float(len(var)) #promedio de las mediciones al final del test
         var = scriptSys.get_data('CURRENT', range(scriptSys.TIME - currentAverage,scriptSys.TIME))
         I1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
-        Z2 = int((float(V2)/float(I1))*1000)
+        Z2 = int( ( (float(V2)-float(V1))/float(I1) ) *1000 )
         scriptSys.EVAL['int_z2'] = str(Z2)
         scriptSys.EVAL['int_z'] =   str(Z2) #str(round(Z1,0))
         # chequear rectas
         print "PAUSE"
         return
 
-    if  actual_time >= tTestB  and  actual_time < (tTestB + tMargin) :
+    if  actual_time >= (tTestB2 - tMargin)  and  actual_time < (tTestB2 + tMargin) :
         # deja reposar y chequea q no caiga la tension
         # stress_test()
         print "DISCHARGE,1.5"
         return
 
-    if  actual_time >= tTestA  and  actual_time < (tTestA + tMargin) :
+    if  actual_time >= (tTestA2 - tMargin)  and  actual_time < (tTestA2 + tMargin) :
         # print "DISCHARGE,0.2"  Descarga suave
         scriptSys.import_data()
         t = scriptSys.TIME_INIT + 2 #delay en el inicio de la descarga
-        var = scriptSys.get_data('VOLTAGE', range( t , t + voltageAverage))
+        var = scriptSys.get_data('VOLTAGE', range( t - 5, t- 5 + voltageAverage))
         V1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
         var = scriptSys.get_data('VOLTAGE', range( scriptSys.TIME - voltageAverage, scriptSys.TIME ))
         V2 = sum(var) / float(len(var)) #promedio de las mediciones al final del test
         var = scriptSys.get_data('CURRENT', range( scriptSys.TIME - currentAverage,scriptSys.TIME))
         I1 = sum(var) / float(len(var)) #promedio de las mediciones al principio
-        Z1 = int((float(V2)/float(I1))*1000)
+        Z1 = int( ( (float(V2)-float(V1))/float(I1) ) *1000 )
+
         scriptSys.EVAL['int_z1'] =  str(Z1) #str(round(Z1,3))
         # chequear rectas
         print "PAUSE"
@@ -134,8 +209,8 @@ def measure_z1() :
 ################################################################
 
 #Setup
-tStress =   9  #tiempo de descarga suave
-tRest   =   9  #tiempo de descarga fuerte
+tStress =   10  #tiempo de descarga suave
+tRest   =   10  #tiempo de descarga fuerte
 
 #
 def stress_test() :
@@ -143,30 +218,41 @@ def stress_test() :
         scriptSys.GENERAL['mode'] = 'STRESS'
         scriptSys.TIME_INIT = scriptSys.TIME
         print "DISCHARGE,1.8"
+        return
+
     actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
 
-    if  actual_time >= (5*tStress + 5*tRest) :# 5 ciclo terminado
+    if  actual_time >= (5*tStress + 5*tRest + 60) :# 5 ciclo terminado
         # print "PAUSE"
         final_report()
         return
-    if  actual_time >= (5*tStress + 4*tRest) :
+    if  actual_time >= (5*tStress + 4*tRest - tMargin) :
         print "PAUSE"
-    if  actual_time >= (4*tStress + 4*tRest)    and  actual_time < (5*tStress + 4*tRest) :# 4 ciclo
+        return
+    if  actual_time >= (4*tStress + 4*tRest - tMargin)    and  actual_time < (5*tStress + 4*tRest + tMargin) :# 4 ciclo
         print "DISCHARGE,1.8"
-    if  actual_time >= (4*tStress + 3*tRest)    and  actual_time < (4*tStress + 4*tRest) :
+        return
+    if  actual_time >= (4*tStress + 3*tRest - tMargin)    and  actual_time < (4*tStress + 4*tRest + tMargin) :
         print "PAUSE"
-    if  actual_time >= (3*tStress + 3*tRest)    and  actual_time < (4*tStress + 3*tRest) :# 3 ciclo
+        return
+    if  actual_time >= (3*tStress + 3*tRest - tMargin)    and  actual_time < (4*tStress + 3*tRest + tMargin) :# 3 ciclo
         print "DISCHARGE,1.8"
-    if  actual_time >= (3*tStress + 2*tRest)    and  actual_time < (3*tStress + 3*tRest) :
+        return
+    if  actual_time >= (3*tStress + 2*tRest - tMargin)    and  actual_time < (3*tStress + 3*tRest + tMargin) :
         print "PAUSE"
-    if  actual_time >= (2*tStress + 2*tRest)    and  actual_time < (3*tStress + 2*tRest) :# 2 ciclo
+        return
+    if  actual_time >= (2*tStress + 2*tRest - tMargin)    and  actual_time < (3*tStress + 2*tRest + tMargin) :# 2 ciclo
         print "DISCHARGE,1.8"
-    if  actual_time >= (2*tStress + tRest)      and  actual_time < (2*tStress + 2*tRest) :
+        return
+    if  actual_time >= (2*tStress + tRest - tMargin)      and  actual_time < (2*tStress + 2*tRest + tMargin) :
         print "PAUSE"
-    if  actual_time >= (tStress + tRest)        and  actual_time < (2*tStress + tRest) :   # 1 ciclo
+        return
+    if  actual_time >= (tStress + tRest - tMargin)        and  actual_time < (2*tStress + tRest + tMargin) :   # 1 ciclo
         print "DISCHARGE,1.8"
-    if  actual_time >= (tStress)                and  actual_time < (tStress + tRest):
+        return
+    if  actual_time >= (tStress - tMargin)                and  actual_time < (tStress + tRest + tMargin):
         print "PAUSE"
+        return
     return
 
 ################################################################

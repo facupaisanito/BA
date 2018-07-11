@@ -218,6 +218,8 @@ def stress_test() :
         scriptSys.GENERAL['mode'] = 'STRESS'
         scriptSys.TIME_INIT = scriptSys.TIME
         print "DISCHARGE,1.8"
+        return
+
     actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
 
     if  actual_time >= (5*tStress + 5*tRest + 60) :# 5 ciclo terminado
@@ -226,22 +228,31 @@ def stress_test() :
         return
     if  actual_time >= (5*tStress + 4*tRest - tMargin) :
         print "PAUSE"
+        return
     if  actual_time >= (4*tStress + 4*tRest - tMargin)    and  actual_time < (5*tStress + 4*tRest + tMargin) :# 4 ciclo
         print "DISCHARGE,1.8"
+        return
     if  actual_time >= (4*tStress + 3*tRest - tMargin)    and  actual_time < (4*tStress + 4*tRest + tMargin) :
         print "PAUSE"
+        return
     if  actual_time >= (3*tStress + 3*tRest - tMargin)    and  actual_time < (4*tStress + 3*tRest + tMargin) :# 3 ciclo
         print "DISCHARGE,1.8"
+        return
     if  actual_time >= (3*tStress + 2*tRest - tMargin)    and  actual_time < (3*tStress + 3*tRest + tMargin) :
         print "PAUSE"
+        return
     if  actual_time >= (2*tStress + 2*tRest - tMargin)    and  actual_time < (3*tStress + 2*tRest + tMargin) :# 2 ciclo
         print "DISCHARGE,1.8"
+        return
     if  actual_time >= (2*tStress + tRest - tMargin)      and  actual_time < (2*tStress + 2*tRest + tMargin) :
         print "PAUSE"
+        return
     if  actual_time >= (tStress + tRest - tMargin)        and  actual_time < (2*tStress + tRest + tMargin) :   # 1 ciclo
         print "DISCHARGE,1.8"
+        return
     if  actual_time >= (tStress - tMargin)                and  actual_time < (tStress + tRest + tMargin):
         print "PAUSE"
+        return
     return
 
 ################################################################
