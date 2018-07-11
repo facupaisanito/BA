@@ -50,7 +50,7 @@ iCharge1 =          	'1.5'
 vCharge1 =          	'4.1'
 iCharge2 =          	'0.5'
 vCharge2 =          	'4.2'
-iDischarge1 =       	'1.8'
+iDischarge1 =       	'1.6'
 iDischarge2 =       	'1.3'
 iDischarge3 =       	'0.5'
 ################################################################
@@ -175,6 +175,15 @@ def zmeasure_state() :
     sys.exit()
     return
 ################################################################
+##########                  Z_MEASURE                 ##########
+################################################################
+def zmeasure2_state() :
+    scriptInc.measure_z2()
+
+    scriptSys.ini_Update()
+    sys.exit()
+    return
+################################################################
 ##########                  STRESS                     ##########
 ################################################################
 def stress_state():
@@ -232,6 +241,8 @@ if scriptSys.GENERAL['mode'] == "CONDITIONING":
     cond_state()
 if scriptSys.GENERAL['mode'] == "Z_MEASURE":
     zmeasure_state()
+if scriptSys.GENERAL['mode'] == "Z_MEASURE2":
+    zmeasure2_state()
 if scriptSys.GENERAL['mode'] == "STRESS":
     stress_state()
 if scriptSys.GENERAL['mode'] == "PAUSE":
