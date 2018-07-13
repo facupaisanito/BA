@@ -36,11 +36,11 @@ for px in sys.argv:
             sys.exit()
 
 #Setup
-umbralVoltTarget =  	3600
+umbralVoltTarget =  	3900
 
-umbralVoltHigh =    	umbralVoltTarget * 1.02
+umbralVoltHigh =    	umbralVoltTarget
 umbralVoltLow =     	umbralVoltTarget * 0.98
-umbralVolt =        	100
+umbralVolt =        	umbralVoltTarget * 0.03
 maxTimeInit =       	10          # 10 seg
 maxTimeDischarge =  	30 * 60     # 30 min
 minTimeDischarge =  	60
@@ -66,18 +66,16 @@ iDischarge4 =       	'0.5'
 def init_state() :
     if int(scriptSys.TIME) >= maxTimeInit :
         if scriptSys.VOLTAGE <= umbralVoltLow:
-            # charge_state(1)
-            scriptInc.already_charged(1)
+            charge_state(1)
             sys.exit()
-        if scriptSys.VOLTAGE > umbralVoltHigh:
-            discharge_state(1)
+        if scriptSys.VOLTAGE > umbralVoltLow:
+            # discharge_state()
+            scriptInc.already_charged()
             sys.exit()
 
         if scriptSys.VOLTAGE < umbralVoltHigh and \
             scriptSys.VOLTAGE > umbralVoltLow:
-            scriptInc.already_charged(1)
-
-            # zmeasure_state()
+            zmeasure_state()
             sys.exit()
     print "RUN"
     scriptSys.ini_Update()
@@ -90,11 +88,11 @@ def charge_state(number) :
     if not scriptSys.GENERAL['mode'] == 'CHARGE' : #si es llamado por 1 vez
         scriptSys.GENERAL['mode'] = 'CHARGE'
         scriptSys.TIME_INIT = scriptSys.TIME
-        if (umbralVoltTarget - scriptSys.VOLTAGE) < (0.05 * umbralVoltTarget):
+        if (umbralVoltTarget - scriptSys.VOLTAGE) < (0.1 * umbralVoltTarget):
             number = 4
-        elif (umbralVoltTarget - scriptSys.VOLTAGE) < (0.1 * umbralVoltTarget):
-            number = 3
         elif (umbralVoltTarget - scriptSys.VOLTAGE) < (0.2 * umbralVoltTarget):
+            number = 3
+        elif (umbralVoltTarget - scriptSys.VOLTAGE) < (0.4 * umbralVoltTarget):
             number = 2
         else:
             number = 1
@@ -130,21 +128,11 @@ def discharge_state(number) :
     if not scriptSys.GENERAL['mode'] == 'DISCHARGE' : #si es llamado por 1 vez
         scriptSys.GENERAL['mode'] = 'DISCHARGE'
         scriptSys.TIME_INIT = scriptSys.TIME
-        if (scriptSys.VOLTAGE - umbralVoltTarget)  >  (0.2 * umbralVoltTarget):
-            number = 1
-        elif (scriptSys.VOLTAGE - umbralVoltTarget) > (0.05 * umbralVoltTarget):
-            number = 2
-        elif (scriptSys.VOLTAGE - umbralVoltTarget) > (0.01 * umbralVoltTarget):
-            number = 3
-        else:
-            number = 4
         if number == 1 : print "DISCHARGE,"+ iDischarge1
         if number == 2 : print "DISCHARGE,"+ iDischarge2
         if number == 3 : print "DISCHARGE,"+ iDischarge3
-        if number == 4 : print "DISCHARGE,"+ iDischarge4
         scriptSys.ini_Update()
         sys.exit()
-        return
 
     if scriptSys.VOLTAGE < (umbralVoltTarget - umbralVolt) \
         and (scriptSys.TIME - scriptSys.TIME_INIT) >= minTimeDischarge:
@@ -177,23 +165,23 @@ def cond_state():
         sys.exit()
 
     if  ((scriptSys.TIME) - (scriptSys.TIME_INIT)) >= (maxTimeCond - tMargin):
-        # if scriptSys.VOLTAGE < umbralVoltLow:
-        #     charge_state(2)
-        #     scriptSys.ini_Update()
-        #     sys.exit()
-        #     return
-
-
-        if scriptSys.VOLTAGE > umbralVoltHigh:
-            discharge_state(2)
+        if scriptSys.VOLTAGE < umbralVoltLow:
+            charge_state(2)
             scriptSys.ini_Update()
             sys.exit()
+            return
+
+        scriptInc.already_charged()
+
+        # if scriptSys.VOLTAGE > umbralVoltHigh:
+        #     discharge_state(2)
+        #     scriptSys.ini_Update()
+        #     sys.exit()
         # if scriptSys.VOLTAGE < umbralVoltHigh and \
         #     scriptSys.VOLTAGE > umbralVoltLow:
         #     scriptInc.measure_z1()
         #     scriptSys.ini_Update()
         #     sys.exit()
-        scriptInc.already_charged(2)
     print "RUN"
     scriptSys.ini_Update()
     sys.exit()  #continua esperando
