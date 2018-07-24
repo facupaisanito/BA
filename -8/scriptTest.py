@@ -106,7 +106,7 @@ def charge_state(number) :
         return
         sys.exit()
 
-    if  scriptSys.VOLTAGE > (4100)  :
+    if  scriptSys.VOLTAGE > (4150)  :
         # (scriptSys.TIME - scriptSys.TIME_INIT) >= minTimeCharge:
         discharge_state(1)
         # cond_state()
