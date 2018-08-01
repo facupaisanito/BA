@@ -60,10 +60,10 @@ def get_line(dType, tLapse):
 ##########                  measure_z1                ##########
 ################################################################
 #Setup
-tTest1  =   30  #tiempo de descarga suave
-tTest2  =   60  #tiempo de descarga fuerte
-tTest3  =   60  #tiempo de recuperacion
-tTest4  =   20  #tiempo de chequeo e incio de sig etapa
+tTest1  =   20  #tiempo de descarga suave
+tTest2  =   140  #tiempo de descarga fuerte
+tTest3  =   400  #tiempo de recuperacion
+tTest4  =   200 #tiempo de chequeo e incio de sig etapa
 tTest5  =   20
 tMargin =   3   #margen de tiempo por no ser 10s exactos
 # voltageAverage = 3
@@ -79,15 +79,15 @@ def measure_z1() :
     if scriptSys.GENERAL['mode'] != 'Z_MEASURE' : #si es llamado por primera vez
         scriptSys.GENERAL['mode'] = 'Z_MEASURE'
         scriptSys.TIME_INIT = scriptSys.TIME
-        print "DISCHARGE,0.6"
+        print "DISCHARGE,1.8"
         return
 
     actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
     if  actual_time >= tTestD :
         # deja reposar y chequea q no caiga la tension
-        # final_report()
+        final_report()
         # stress_test()
-        measure_z2()
+        # measure_z2()
         return
 
     if  actual_time >= (tTestC - tMargin)  and  actual_time < (tTestC + tMargin) :
@@ -110,7 +110,8 @@ def measure_z1() :
     if  actual_time >= (tTestB - tMargin)  and  actual_time < (tTestB + tMargin) :
         # deja reposar y chequea q no caiga la tension
         # stress_test()
-        print "PAUSE"
+        print "DISCHARGE,1.0"
+        # print "PAUSE"
         return
 
     if  actual_time >= (tTestA - tMargin)  and  actual_time < (tTestA + tMargin) :
@@ -126,7 +127,7 @@ def measure_z1() :
         # Z1 = int((float(V2)/float(I1))*1000)
         # scriptSys.EVAL['int_z1'] =  str(Z1) #str(round(Z1,3))
         # chequear rectas
-        print "DISCHARGE,1.2"
+        print "PAUSE"
         return
     print "RUN"
     return

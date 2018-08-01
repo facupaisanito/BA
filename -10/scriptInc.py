@@ -161,7 +161,10 @@ def measure_z2() :
         # deja reposar y chequea q no caiga la tension
         # final_report()
         # stress_test()
-        scriptTest.charge_state(1)
+        scriptSys.GENERAL['mode'] = 'CHARGE'
+        scriptSys.TIME_INIT = scriptSys.TIME
+        print "CHARGE,4.2,1.2"
+        # scriptTest.charge_state(1)
         return
 
     if  actual_time >= (tTestC2 - tMargin)  and  actual_time < (tTestC2 + tMargin) :
