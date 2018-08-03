@@ -289,17 +289,14 @@ def final_report() :
 
 #Setup
 #
-def already_charged(option) :
+def already_charged() :
     if scriptSys.GENERAL['mode'] != 'END' : #si es llamado por primera vez
         scriptSys.GENERAL['mode'] = 'END'
         scriptSys.TIME_INIT = scriptSys.TIME
         print "STOP,NTF,100,0"
 
     scriptSys.GUI['line1'] = "Analysis Finished"
-    if option == 1 :
-        scriptSys.GUI['line2'] = "Batery low voltage :"+ str(scriptSys.VOLTAGE) + 'V'
-    if option == 2 :
-        scriptSys.GUI['line2'] = "Batery already DISCHARGED :"+ str(scriptSys.VOLTAGE) + 'V'
+    scriptSys.GUI['line2'] = "Batery already CHARGED :"+ str(scriptSys.VOLTAGE) + 'V'
     scriptSys.GUI['bgcolor'] = '"120,244,183"'
     scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1']+" Z2="+scriptSys.EVAL['int_z2']
     scriptSys.copy_report()

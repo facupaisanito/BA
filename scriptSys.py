@@ -46,7 +46,6 @@ GUI = {}
 EVAL = {}
 TIME_INIT = 0
 VOLTAGE = 0
-CURRENT = 0
 TIME = 0
 #####################################################
 #####################################################
@@ -205,17 +204,12 @@ try:
             voltage += int(last3lines[1]['VOLTAGE'])
             voltage += int(last3lines[2]['VOLTAGE'])
             VOLTAGE = voltage/3
-            current = int(last3lines[0]['CURRENT'])
-            current += int(last3lines[1]['CURRENT'])
-            current += int(last3lines[2]['CURRENT'])
-            CURRENT = current/3
             TIME = int(last3lines[2]['TIME'])
             GENERAL['voltage'] = str(voltage/3)
             #tension instantanea (en promedio de las ultimas 3 mediciones)
             GENERAL['time'] = last3lines[2]['TIME']
             #tiempo en seg de la ultima vez q se tomo registro
         except :
-            CURRENT = 0
             VOLTAGE = 0
             TIME = 0
             GENERAL['voltage'] = VOLTAGE
