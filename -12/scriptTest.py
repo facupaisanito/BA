@@ -39,15 +39,15 @@ for px in sys.argv:
 ##########                  SETUP                     ##########
 ################################################################
 umbralVoltTarget =  	4100
-umbralCurrentTarget =   400
+umbralCurrentTarget =   300
 umbralVoltHigh =    	umbralVoltTarget
 umbralVoltLow =     	3200
 umbralVolt =        	umbralVoltTarget * 0.03
 maxTimeInit =       	40          # 10 seg
 maxTimeDischarge =  	30 * 60     # 30 min
 minTimeDischarge =  	60
-maxTimeCharge =     	4 * 60 * 60 # 1 hr
-minTimeCharge =     	60
+maxTimeCharge =     	1 * 60 * 60 # 1 hr
+minTimeCharge =     	5* 60
 maxTimeCond =       	45          # 10 seg
 tMargin =               3
 iCharge1 =          	'0.5'
@@ -55,7 +55,7 @@ iCharge2 =          	'1.8'
 iCharge3 =          	'1.3'
 iCharge4 =          	'1.0'
 vCharge1 =          	'4.1'
-vCharge2 =          	'4.1'
+vCharge2 =          	'4.2'
 vCharge3 =          	'4.1'
 vCharge4 =          	'4.2'
 iDischarge1 =       	'1.6'

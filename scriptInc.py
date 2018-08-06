@@ -61,8 +61,6 @@ def final_report(mode, value) :
             scriptSys.GUI['bgcolor'] = '"120,244,183"'
             scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
                 +" Z2="+scriptSys.EVAL['int_z2']
-            scriptSys.copy_report()
-            return
         if mode == "soh" :
             print "STOP,NTF,"+str(value)+","+ scriptSys.EVAL['int_z']
 
@@ -72,8 +70,9 @@ def final_report(mode, value) :
             scriptSys.GUI['bgcolor'] = '"120,244,183"'
             scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
                 +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
-            scriptSys.copy_report()
-            return
+        scriptSys.ini_Update()
+        scriptSys.copy_report()
+        return
     except:
         scriptSys.error_report("final_report()")
 ################################################################
@@ -261,7 +260,7 @@ tTest5  =   20
 # tTest3  =   40  #tiempo de recuperacion
 # tTest4  =   30 #tiempo de chequeo e incio de sig etapa
 # tTest5  =   20
-tMargin =   3   #margen de tiempo por no ser 10s exactos
+tMargin =   4   #margen de tiempo por no ser 10s exactos
 # voltageAverage = 3
 # currentAverage = 5
 # Z1 = 0
@@ -270,7 +269,8 @@ tTestA  =   tTest1
 tTestB  =   tTest1 + tTest2
 tTestC  =   tTest1 + tTest2 + tTest3
 tTestD  =   tTest1 + tTest2 + tTest3 + tTest4
-
+iCharge1 =          	'0.5'
+vCharge1 =          	'4.2'
 iDischargeTest1 =       	'1.8'
 iDischargeTest2 =       	'1.0'
 
@@ -331,7 +331,9 @@ def evaluate() :
         flag4 = False
         for line in scriptSys.data:
             i = int(line['CURRENT'])
-            if i >= (iDischTest1 - iMar) and i <=(iDischTest1 + iMar) and flag1:
+            t = int(line['TIME'])
+            if i >= (iDischTest1 - iMar) and i <=(iDischTest1 + iMar) \
+                and flag1 and (t > scriptSys.TIME_INIT):
                 flag1 = False
                 ind =  scriptSys.data.index(line) -1
                 Vi0 =  int(scriptSys.data[ind-1]['VOLTAGE'])
@@ -341,13 +343,15 @@ def evaluate() :
                 Vi0 += int(scriptSys.data[ind-5]['VOLTAGE'])
                 Vi0 /= 5 #promedio de las ultimas 5 muestas antes de la descarga
                 flag2 = True
-            if i >= (- iMar) and i <= iMar and flag2:
+            if i >= (- iMar) and i <= iMar and flag2 \
+                and (t > scriptSys.TIME_INIT):
                 flag2 = False
                 ind = scriptSys.data.index(line)
                 Vd1 = Vi0 - int(scriptSys.data[ind+ 6]['VOLTAGE'])
                 Vd2 = Vi0 - int(scriptSys.data[ind+30]['VOLTAGE'])
                 flag3 = True
-            if i >= (iDischTest2 - iMar) and i <=(iDischTest2 + iMar) and flag3:
+            if i >= (iDischTest2 - iMar) and i <=(iDischTest2 + iMar) \
+                and flag3 and (t > scriptSys.TIME_INIT):
                 flag3 = False
                 ind =  scriptSys.data.index(line) -1
                 Vi1 =  int(scriptSys.data[ind-1]['VOLTAGE'])
@@ -357,7 +361,8 @@ def evaluate() :
                 Vi1 += int(scriptSys.data[ind-5]['VOLTAGE'])
                 Vi1 /= 5 #promedio de las ultimas 5 muestas antes de la descarga
                 flag4 = True
-            if i >= (- iMar) and i <= iMar and flag4:
+            if i >= (- iMar) and i <= iMar and flag4 \
+                and (t > scriptSys.TIME_INIT):
                 flag4 = False
                 ind = scriptSys.data.index(line)
                 Vd3 = Vi0 - int(scriptSys.data[ind+13]['VOLTAGE'])
