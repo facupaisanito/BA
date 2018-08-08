@@ -4,3 +4,5 @@
 *.icloud
 
 *.html
+
+\.DS_Store
