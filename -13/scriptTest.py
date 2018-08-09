@@ -39,7 +39,7 @@ for px in sys.argv:
 ##########                  SETUP                     ##########
 ################################################################
 umbralVoltTarget =  	4100
-umbralCurrentTarget =   200
+umbralCurrentTarget =   400
 umbralVoltHigh =    	umbralVoltTarget
 umbralVoltLow =     	3200
 umbralVolt =        	umbralVoltTarget * 0.03
@@ -114,12 +114,7 @@ def charge_state(number) :
             return
 
         if (int(scriptSys.TIME) - int(scriptSys.TIME_INIT)) >= maxTimeCharge :
-            scriptSys.GENERAL['mode']= "STOP"
-            print "STOP"
-            scriptSys.GUI['line1'] = "Analysis Stopped"
-            scriptSys.GUI['line2'] = "Max time of CHARGE reached"
-            scriptSys.GUI['bgcolor'] = '"244,0,0"'
-            scriptSys.GUI['extra_info'] = "This is scriptTest.py"
+            scriptInc.final_report("maxTimeCharge")
             return
         # print "RUN"
         print "CHARGE,"+ vCharge2 +","+ iCharge2
@@ -145,13 +140,7 @@ def discharge_state(number) :
             return
 
         if (int(scriptSys.TIME) - int(scriptSys.TIME_INIT)) >= maxTimeDischarge:
-            scriptSys.TIME_INIT = scriptSys.TIME
-            scriptSys.GENERAL['mode']= "STOP"
-            print "STOP"
-            scriptSys.GUI['line1'] = "Analysis Stopped"
-            scriptSys.GUI['line2'] = "Max time of DISCHARGE reached"
-            scriptSys.GUI['bgcolor'] = '"244,0,0"'
-            scriptSys.GUI['extra_info'] = "This is scriptTest.py"
+            scriptInc.final_report("maxTimeDischarge")
             return
         print "RUN"
         return

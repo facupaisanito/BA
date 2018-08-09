@@ -54,7 +54,6 @@ def final_report(mode, value) :
             scriptSys.TIME_INIT = scriptSys.TIME
         if mode == 0 :
             print "STOP,NTF,75,"+ scriptSys.EVAL['int_z']
-
             scriptSys.GUI['line1'] = "Analysis Finished"
             scriptSys.GUI['line2'] = "Health: ---    Internal Z: " \
                 + str(scriptSys.EVAL['int_z']) + "mOhm"
@@ -63,10 +62,38 @@ def final_report(mode, value) :
                 +" Z2="+scriptSys.EVAL['int_z2']
         if mode == "soh" :
             print "STOP,NTF,"+str(value)+","+ scriptSys.EVAL['int_z']
-
             scriptSys.GUI['line1'] = "Analysis Finished"
             scriptSys.GUI['line2'] = "Health: "+str(value)+"    Internal Z: " \
                 + str(scriptSys.EVAL['int_z']) + "mOhm"
+            scriptSys.GUI['bgcolor'] = '"120,244,183"'
+            scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
+                +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
+        if mode == "maxTimeCharge" :
+            scriptSys.GENERAL['mode']= "STOP"
+            print "STOP"
+            scriptSys.GUI['line1'] = "Analysis Stopped"
+            scriptSys.GUI['line2'] = "Max time of CHARGE reached"
+            scriptSys.GUI['bgcolor'] = '"244,0,0"'
+            scriptSys.GUI['extra_info'] = "This is scriptTest.py"
+        if mode == "maxTimeDischarge" :
+            scriptSys.TIME_INIT = scriptSys.TIME
+            scriptSys.GENERAL['mode']= "STOP"
+            print "STOP"
+            scriptSys.GUI['line1'] = "Analysis Stopped"
+            scriptSys.GUI['line2'] = "Max time of DISCHARGE reached"
+            scriptSys.GUI['bgcolor'] = '"244,0,0"'
+            scriptSys.GUI['extra_info'] = "This is scriptTest.py"
+        if mode == "SoHok" :
+            print "STOP,NTF,"+str(value)+","+ scriptSys.EVAL['int_z']
+            scriptSys.GUI['line1'] = "Analysis Finished"
+            scriptSys.GUI['line2'] = "No trouble found"
+            scriptSys.GUI['bgcolor'] = '"120,244,183"'
+            scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
+                +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
+        if mode == "SoHfail" :
+            print "STOP,FAIL,"+str(value)+","+ scriptSys.EVAL['int_z']
+            scriptSys.GUI['line1'] = "Analysis Finished"
+            scriptSys.GUI['line2'] = "Fail"
             scriptSys.GUI['bgcolor'] = '"120,244,183"'
             scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
                 +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
@@ -313,6 +340,7 @@ def stress_test() :
 ##########                  EVALUATE                  ##########
 ################################################################
 #Setup
+Boundary = 75
 iDischTest1 =   int(-1000 * float(iDischargeTest1))
 iDischTest2 =   int(-1000 * float(iDischargeTest2))
 iMar =       60
@@ -370,7 +398,10 @@ def evaluate() :
         #regresion lineal
         result = factor1 * Vd1 + factor2 * Vd2 + factor3 * Vd3 + factor4 * Vd4
         SoH = int((result * slope + origin)/1000)
-        final_report("soh",SoH)
+        if SoH >= Boundary:
+            final_report("SoHok",SoH)
+        else:
+            final_report("SoHfail",SoH)
         return
     except:
         scriptSys.error_report("evaluate()")

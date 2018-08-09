@@ -54,7 +54,6 @@ def final_report(mode, value) :
             scriptSys.TIME_INIT = scriptSys.TIME
         if mode == 0 :
             print "STOP,NTF,75,"+ scriptSys.EVAL['int_z']
-
             scriptSys.GUI['line1'] = "Analysis Finished"
             scriptSys.GUI['line2'] = "Health: ---    Internal Z: " \
                 + str(scriptSys.EVAL['int_z']) + "mOhm"
@@ -63,19 +62,39 @@ def final_report(mode, value) :
                 +" Z2="+scriptSys.EVAL['int_z2']
         if mode == "soh" :
             print "STOP,NTF,"+str(value)+","+ scriptSys.EVAL['int_z']
-
             scriptSys.GUI['line1'] = "Analysis Finished"
             scriptSys.GUI['line2'] = "Health: "+str(value)+"    Internal Z: " \
                 + str(scriptSys.EVAL['int_z']) + "mOhm"
             scriptSys.GUI['bgcolor'] = '"120,244,183"'
             scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
                 +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
-        if mode == "tMaxStress" :
-            print "STOP,NTF,0,0"
-
+        if mode == "maxTimeCharge" :
+            scriptSys.GENERAL['mode']= "STOP"
+            print "STOP"
             scriptSys.GUI['line1'] = "Analysis Stopped"
-            scriptSys.GUI['line2'] = "Time limit for discharge was reached "
-            scriptSys.GUI['bgcolor'] = '"244,20,20"'
+            scriptSys.GUI['line2'] = "Max time of CHARGE reached"
+            scriptSys.GUI['bgcolor'] = '"244,0,0"'
+            scriptSys.GUI['extra_info'] = "This is scriptTest.py"
+        if mode == "maxTimeDischarge" :
+            scriptSys.TIME_INIT = scriptSys.TIME
+            scriptSys.GENERAL['mode']= "STOP"
+            print "STOP"
+            scriptSys.GUI['line1'] = "Analysis Stopped"
+            scriptSys.GUI['line2'] = "Max time of DISCHARGE reached"
+            scriptSys.GUI['bgcolor'] = '"244,0,0"'
+            scriptSys.GUI['extra_info'] = "This is scriptTest.py"
+        if mode == "SoHok" :
+            print "STOP,NTF,"+str(value)+","+ scriptSys.EVAL['int_z']
+            scriptSys.GUI['line1'] = "Analysis Finished"
+            scriptSys.GUI['line2'] = "No trouble found"
+            scriptSys.GUI['bgcolor'] = '"120,244,183"'
+            scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
+                +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
+        if mode == "SoHfail" :
+            print "STOP,FAIL,"+str(value)+","+ scriptSys.EVAL['int_z']
+            scriptSys.GUI['line1'] = "Analysis Finished"
+            scriptSys.GUI['line2'] = "Fail"
+            scriptSys.GUI['bgcolor'] = '"120,244,183"'
             scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
                 +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
         scriptSys.ini_Update()
@@ -279,7 +298,7 @@ tTestC  =   tTest1 + tTest2 + tTest3
 tTestD  =   tTest1 + tTest2 + tTest3 + tTest4
 iCharge1 =          	'0.5'
 vCharge1 =          	'4.2'
-iDischargeTest1 =       	'1.0'
+iDischargeTest1 =       	'1.5'
 iDischargeTest2 =       	'1.0'
 tMaxStress =     	4 * 60 * 60 # 4 hr
 vMar = 16
