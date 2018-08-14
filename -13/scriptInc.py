@@ -302,6 +302,7 @@ iDischargeTest1 =       	'1.5'
 iDischargeTest2 =       	'1.0'
 tMaxStress =     	4 * 60 * 60 # 4 hr
 vMar = 16
+lowVoltageLimit = 3000
 #
 def stress_test() :
     try:
@@ -311,7 +312,7 @@ def stress_test() :
             print "DISCHARGE,"+ iDischargeTest1
             return
 
-        if scriptSys.VOLTAGE >= -vMar and scriptSys.VOLTAGE <= vMar: #si actula la proteccion cargo la Batery
+        if scriptSys.VOLTAGE <= lowVoltageLimit: #si actula la proteccion cargo la Batery
             evaluate()
             return
 
