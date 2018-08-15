@@ -43,15 +43,17 @@ umbralCurrentTarget =   400
 umbralVoltHigh =    	umbralVoltTarget
 umbralVoltLow =     	3200
 umbralVolt =        	umbralVoltTarget * 0.03
-maxTimeInit =       	40          # 10 seg
+maxTimeInit =       	20          # 10 seg
+maxTimeInitFail =      	40          # 10 seg
 maxTimeDischarge =  	30 * 60     # 30 min
 minTimeDischarge =  	60
 maxTimeCharge =     	4 * 60 * 60 # 1 hr
 minTimeCharge =     	2 * 60
 maxTimeCond =       	60          # 10 seg
 tMargin =               3
+vMargin =               16
 iCharge1 =          	'0.5'
-iCharge2 =          	'1.8'
+iCharge2 =          	'1.5'
 iCharge3 =          	'1.3'
 iCharge4 =          	'1.0'
 vCharge1 =          	'4.1'
@@ -65,11 +67,13 @@ iDischarge4 =       	'0.5'
 ################################################################
 ##########                  INIT                      ##########
 ################################################################
-
 def init_state() :
     try:
-        if int(scriptSys.TIME) >= maxTimeInit :
+        if scriptSys.TIME >= maxTimeInit and scriptSys.VOLTAGE > vMargin:
             charge_state(1)
+            return
+        if scriptSys.TIME >= maxTimeInitFail and scriptSys.VOLTAGE <= vMargin:
+            scriptSys.final_report("F01",0)
             return
             # if scriptSys.VOLTAGE <= umbralVoltLow:
             #     charge_state(1)
@@ -107,6 +111,10 @@ def charge_state(number) :
             # if number == 1 :
             print "CHARGE,"+ vCharge1 +","+ iCharge1
             return
+        if  scriptSys.VOLTAGE < (int(1000*float(vCharge2)) + vMargin) and \
+            scriptSys.VOLTAGE > (int(1000*float(vCharge2)) - vMargin) and \
+            scriptSys.CURRENT < vMargin:
+            scriptSys.final_report(0)
 
         if  scriptSys.CURRENT <= (umbralCurrentTarget) and \
             (scriptSys.TIME - scriptSys.TIME_INIT) >= minTimeCharge:
@@ -114,7 +122,7 @@ def charge_state(number) :
             return
 
         if (int(scriptSys.TIME) - int(scriptSys.TIME_INIT)) >= maxTimeCharge :
-            scriptInc.final_report("maxTimeCharge")
+            scriptSys.final_report("maxTimeCharge")
             return
         # print "RUN"
         print "CHARGE,"+ vCharge2 +","+ iCharge2
@@ -140,7 +148,7 @@ def discharge_state(number) :
             return
 
         if (int(scriptSys.TIME) - int(scriptSys.TIME_INIT)) >= maxTimeDischarge:
-            scriptInc.final_report("maxTimeDischarge")
+            scriptSys.final_report("maxTimeDischarge")
             return
         print "RUN"
         return
@@ -160,6 +168,10 @@ def cond_state():
         if  ((scriptSys.TIME) - (scriptSys.TIME_INIT)) >= (maxTimeCond-tMargin):
             stress_state()
             return
+        if  scriptSys.VOLTAGE < (int(1000*float(vCharge2)) + vMargin) and \
+            scriptSys.VOLTAGE > (int(1000*float(vCharge2)) - vMargin) and \
+            scriptSys.CURRENT < vMargin:
+            scriptSys.final_report(0)
             # if scriptSys.VOLTAGE < umbralVoltLow:
             #     charge_state(2)
             #     scriptSys.ini_Update()

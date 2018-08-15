@@ -58,8 +58,6 @@ def ini_Update ():
         GENERAL['time'] = str(TIME)
         GENERAL['time_init'] = str(TIME_INIT)
         GENERAL['voltage'] = str(VOLTAGE)
-
-
         for option in GENERAL:
             config.set('General',option,GENERAL[option])
         for option in GUI:
@@ -70,7 +68,273 @@ def ini_Update ():
             config.write(configfile)
         return
     except:
-        scriptSys.error_report("ini_Update()")
+        # print "STOP,FAIL,0,0"
+        print "Script ERROR:ini_Update()"
+################################################################
+##########                  ERROR REPORT              ##########
+################################################################
+def error_report(string):
+    try:
+        print "STOP"
+        # print "Script ERROR: " + str(string)
+        #
+        GUI['line1'] = "Script ERROR"
+        GUI['line2'] = "Conflict part :"+ str(string)
+        GUI['bgcolor'] = '"244,10,10"'
+        GUI['extra_info'] = " TIME="+str(TIME)+" Tinit="+str(TIME_INIT)
+        ini_Update()
+    except:
+        print "error_report() ERROR"
+    sys.exit()
+################################################################
+##########                  COPY REPORT               ##########
+################################################################
+def copy_report() :
+    try:
+        try:
+            with open(PATH + STATION_N + ".csv", "rb") as ifile:
+                ifile.readline()
+                name = ifile.readline()
+                name = name.replace(" ","_")
+                name = name.replace(",","_")
+                name = name.replace(".","")
+                name = name.replace(":","-")
+                name = name[:-12]
+                reader = csv.reader(ifile)
+                dato = []
+                for row in reader:
+                    dato.append(row)
+            ifile.close()
+        except:
+            print "el copy no funciono csv1"
+        file_path = "historial/"+ name
+        directory = os.path.dirname(file_path)
+        try:
+            os.stat(directory)
+        except:
+            os.mkdir(directory)
+        try:
+            myFile = open( file_path +".csv", 'w')
+            with myFile:
+                writer = csv.writer(myFile)
+                writer.writerows(dato)
+            myFile.close()
+        except:
+            print "Create /historal folder!!!"
+        try:
+            with open(PATH + STATION_N + ".ini", "rb") as ifile:
+                reader = csv.reader(ifile)
+                dato = []
+                for row in reader:
+                    dato.append(row)
+            ifile.close()
+        except:
+            print "el copy no funciono csv1"
+        try:
+            myFile = open(file_path +".ini", 'w')
+            with myFile:
+                writer = csv.writer(myFile)
+                writer.writerows(dato)
+            myFile.close()
+        except:
+            print "el copy no funciono csv2"
+        #
+        return
+    except:
+        error_report("copy_report()")
+################################################################
+##########                  FINAL REPORT              ##########
+################################################################
+def final_report(mode, *value) :
+    try:
+        if mode == 0 :
+            print "STOP,NTF,75,0"
+            GUI['line1'] = "Analysis Finished"
+            GUI['line2'] = "Health: ---    Internal Z: " \
+                + str(EVAL['int_z']) + "mOhm"
+            GUI['bgcolor'] = '"120,244,183"'
+            GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
+                +" Z2="+EVAL['int_z2']
+        if mode == "soh" :
+            print "STOP,NTF,"+str(value[0])+","+ EVAL['int_z']
+            GUI['line1'] = "Analysis Finished"
+            GUI['line2'] = "Health: "+str(value[0])+"    Internal Z: " \
+                + str(EVAL['int_z']) + "mOhm"
+            GUI['bgcolor'] = '"120,244,183"'
+            GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
+                +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
+        if mode == "maxTimeCharge" :
+            GENERAL['mode']= "STOP"
+            print "STOP"
+            GUI['line1'] = "Analysis Stopped"
+            GUI['line2'] = "Max time of CHARGE reached"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "This is scriptTest.py"
+        if mode == "maxTimeDischarge" :
+            TIME_INIT = TIME
+            GENERAL['mode']= "STOP"
+            print "STOP"
+            GUI['line1'] = "Analysis Stopped"
+            GUI['line2'] = "Max time of DISCHARGE reached"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "This is scriptTest.py"
+        if mode == "SoHok" :
+            print "STOP,NTF,"+str(value[0])+","+ EVAL['int_z']
+            GUI['line1'] = "Analysis Finished"
+            GUI['line2'] = "No trouble found"
+            GUI['bgcolor'] = '"120,244,183"'
+            GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
+                +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
+        if mode == "SoHfail" :
+            print "STOP,FAIL,"+str(value[0])+","+ EVAL['int_z']
+            GUI['line1'] = "Analysis Finished"
+            GUI['line2'] = "Fail"
+            GUI['bgcolor'] = '"120,244,183"'
+            GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
+                +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
+        if mode == "sohAW" :
+            print "STOP,NTF,"+str(value[0])+","+ EVAL['int_z']
+            GUI['line1'] = "Analysis Finished"
+            GUI['line2'] = "Health: "+str(value[0])+"    Internal Z: " \
+                + str(EVAL['int_z']) + "mOhm"
+            GUI['bgcolor'] = '"120,244,183"'
+            GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
+                +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
+        if mode == "maxTimeInitFail" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "maxTimeInitFail Finished"
+            GUI['line2'] = "Health: "+str(value[0])+"    Internal Z: " \
+                + str(EVAL['int_z']) + "mOhm"
+            GUI['bgcolor'] = '"120,244,183"'
+            GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
+                +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
+
+        if mode == "F01" :
+            print "STOP,FAIL,0,01"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F01"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F02" :
+            print "STOP,FAIL,0,02"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F02"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F03" :
+            print "STOP,FAIL,0,03"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F03"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F04" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F04"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F05" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F05"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F06" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F06"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F07" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F07"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F08" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F08"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F09" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F09"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F10" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F10"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F11" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F11"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F12" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F12"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F13" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F13"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F14" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F14"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F15" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F15"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F16" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F16"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F17" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F17"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F18" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F18"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F19" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F019"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        if mode == "F20" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F20"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
+        ini_Update()
+        copy_report()
+        # return
+    except:
+        error_report("final_report()")
+    sys.exit()
 ################################################################
 ##########                  import_data                ##########
 ################################################################
@@ -106,7 +370,7 @@ def import_data():
         GENERAL['line_b'] = str(holes)
         return
     except:
-        scriptSys.error_report("import_data()")
+        error_report("import_data()")
 ################################################################
 ##########                  get_data                ##########
 ################################################################
@@ -125,11 +389,35 @@ def get_data(dType, tLapse):
             return info[0]
         return info
     except:
+        error_report("get_data()")
+################################################################
+##########                  get_slope                ##########
+################################################################
+def get_slope(tLapse):
+    try:
+        v = get_data("VOLTAGE",tLapse)
+        i = get_data("CURRENT",tLapse)
+        t = get_data("TEMP",tLapse)
+        dI1 =0
+        for a in range(len(i)-1):
+            dI1 += i[a+1] - i[a]
+        iSlope = ( 1000* dI1) / len(i)
+        dV1 =0
+        for a in range(len(v)-1):
+            dV1 += v[a+1] - v[a]
+        vSlope = ( 1000* dV1) / len(v)
+        dt1 =0
+        for a in range(len(t)-1):
+            dt1 += t[a+1] - t[a]
+        tSlope = ( 1000* dt1) / len(t)
+        slope = {"VOLTAGE":vSlope ,"CURRENT": iSlope ,"TEMP": tSlope}
+        return slope
+    except:
         scriptSys.error_report("get_data()")
+
 ################################################################
 ##########                  get_data                ##########
 ################################################################
-
 def import_ini( STATION_N ):
     try:
         try: config.read(PATH +STATION_N+".ini")
@@ -154,6 +442,8 @@ def import_ini( STATION_N ):
             config.set('General','time_init','0')
         if not 'voltage' in options :
             config.set('General','voltage','')
+        if not 'vstate' in options :
+            config.set('General','vstate','')
         if not 'line_m' in options :
             config.set('General','line_m','')
         if not 'line_b' in options :
@@ -186,79 +476,7 @@ def import_ini( STATION_N ):
             EVAL[option]=config.get('Eval',option)
         return
     except:
-        scriptSys.error_report("import_ini()")
-
-################################################################
-##########                  COPY REPORT               ##########
-################################################################
-
-#Setup
-#
-def copy_report() :
-    try:
-        try:
-            with open(PATH + STATION_N + ".csv", "rb") as ifile:
-                ifile.readline()
-                name = ifile.readline()
-                name = name.replace(" ","_")
-                name = name.replace(",","_")
-                name = name.replace(".","")
-                name = name.replace(":","-")
-                name = name[:-12]
-                reader = csv.reader(ifile)
-                dato = []
-                for row in reader:
-                    dato.append(row)
-            ifile.close()
-        except:
-            print "el copy no funciono csv1"
-        try:
-            myFile = open("historial/"+ name +".csv", 'w')
-            with myFile:
-                writer = csv.writer(myFile)
-                writer.writerows(dato)
-            myFile.close()
-        except:
-            print "Create /historal folder!!!"
-        try:
-            with open(PATH + STATION_N + ".ini", "rb") as ifile:
-                reader = csv.reader(ifile)
-                dato = []
-                for row in reader:
-                    dato.append(row)
-            ifile.close()
-        except:
-            print "el copy no funciono csv1"
-        try:
-            myFile = open("historial/"+ name +".ini", 'w')
-            with myFile:
-                writer = csv.writer(myFile)
-                writer.writerows(dato)
-            myFile.close()
-        except:
-            print "el copy no funciono csv2"
-        #
-        return
-    except:
-        scriptSys.error_report("copy_report()")
-
-################################################################
-##########                  ERROR REPORT              ##########
-################################################################
-def error_report(string):
-    try:
-        print "STOP,NTF,100,0"
-        print "Script ERROR: " + string
-
-        scriptSys.GUI['line1'] = "Script ERROR"
-        scriptSys.GUI['line2'] = "Conflict part :"+ str(string)
-        scriptSys.GUI['bgcolor'] = '"244,10,10"'
-        scriptSys.GUI['extra_info'] = " TIME="+str(TIME)+" Tinit="+str(TIME_INIT)
-        ini_Update()
-        sys.exit()
-    except:
-        print "error_report() ERROR"
-        sys.exit()
+        error_report("import_ini()")
 
 #####################################################
 #####################################################

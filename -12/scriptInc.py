@@ -43,66 +43,6 @@ except:
     print "ERROR Param-scriptDebug en scriptInc !!"
     sys.exit()
 ################################################################
-##########                  FINAL REPORT              ##########
-################################################################
-#Setup
-#
-def final_report(mode, value) :
-    try:
-        if scriptSys.GENERAL['mode'] != 'END' : #si es `llamado por primera vez
-            scriptSys.GENERAL['mode'] = 'END'
-            scriptSys.TIME_INIT = scriptSys.TIME
-        if mode == 0 :
-            print "STOP,NTF,75,"+ scriptSys.EVAL['int_z']
-            scriptSys.GUI['line1'] = "Analysis Finished"
-            scriptSys.GUI['line2'] = "Health: ---    Internal Z: " \
-                + str(scriptSys.EVAL['int_z']) + "mOhm"
-            scriptSys.GUI['bgcolor'] = '"120,244,183"'
-            scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
-                +" Z2="+scriptSys.EVAL['int_z2']
-        if mode == "soh" :
-            print "STOP,NTF,"+str(value)+","+ scriptSys.EVAL['int_z']
-            scriptSys.GUI['line1'] = "Analysis Finished"
-            scriptSys.GUI['line2'] = "Health: "+str(value)+"    Internal Z: " \
-                + str(scriptSys.EVAL['int_z']) + "mOhm"
-            scriptSys.GUI['bgcolor'] = '"120,244,183"'
-            scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
-                +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
-        if mode == "maxTimeCharge" :
-            scriptSys.GENERAL['mode']= "STOP"
-            print "STOP"
-            scriptSys.GUI['line1'] = "Analysis Stopped"
-            scriptSys.GUI['line2'] = "Max time of CHARGE reached"
-            scriptSys.GUI['bgcolor'] = '"244,0,0"'
-            scriptSys.GUI['extra_info'] = "This is scriptTest.py"
-        if mode == "maxTimeDischarge" :
-            scriptSys.TIME_INIT = scriptSys.TIME
-            scriptSys.GENERAL['mode']= "STOP"
-            print "STOP"
-            scriptSys.GUI['line1'] = "Analysis Stopped"
-            scriptSys.GUI['line2'] = "Max time of DISCHARGE reached"
-            scriptSys.GUI['bgcolor'] = '"244,0,0"'
-            scriptSys.GUI['extra_info'] = "This is scriptTest.py"
-        if mode == "SoHok" :
-            print "STOP,NTF,"+str(value)+","+ scriptSys.EVAL['int_z']
-            scriptSys.GUI['line1'] = "Analysis Finished"
-            scriptSys.GUI['line2'] = "No trouble found"
-            scriptSys.GUI['bgcolor'] = '"120,244,183"'
-            scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
-                +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
-        if mode == "SoHfail" :
-            print "STOP,FAIL,"+str(value)+","+ scriptSys.EVAL['int_z']
-            scriptSys.GUI['line1'] = "Analysis Finished"
-            scriptSys.GUI['line2'] = "Fail"
-            scriptSys.GUI['bgcolor'] = '"120,244,183"'
-            scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
-                +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
-        scriptSys.ini_Update()
-        scriptSys.copy_report()
-        return
-    except:
-        scriptSys.error_report("final_report()")
-################################################################
 ##########                  line1                     ##########
 ################################################################
 def get_line(dType, tLapse):
@@ -278,15 +218,17 @@ def measure_z2() :
 
 #Setup
 tTest1  =   20  #tiempo de descarga suave
-tTest2  =   140  #tiempo de descarga fuerte
+tTest2  =   120  #tiempo de descarga fuerte
 tTest3  =   400  #tiempo de recuperacion
-tTest4  =   200 #tiempo de chequeo e incio de sig etapa
+tTest4  =   180 #tiempo de chequeo e incio de sig etapa
 tTest5  =   20
 # tTest1  =   20  #tiempo de descarga suave
 # tTest2  =   10  #tiempo de descarga fuerte
 # tTest3  =   40  #tiempo de recuperacion
 # tTest4  =   30 #tiempo de chequeo e incio de sig etapa
 # tTest5  =   20
+vMargin =               16
+iMargin =               16
 tMargin =   4   #margen de tiempo por no ser 10s exactos
 # voltageAverage = 3
 # currentAverage = 5
@@ -296,15 +238,15 @@ tTestA  =   tTest1
 tTestB  =   tTest1 + tTest2
 tTestC  =   tTest1 + tTest2 + tTest3
 tTestD  =   tTest1 + tTest2 + tTest3 + tTest4
-iCharge1 =          	'0.5'
-vCharge1 =          	'4.2'
-iDischargeTest1 =       	'1.8'
-iDischargeTest2 =       	'1.0'
+iCharge1 =          '0.5'
+vCharge1 =          '4.2'
+iDischargeTest1 =   '1.8'
+iDischargeTest2 =   '1.0'
 
 #
 def stress_test() :
     try:
-        if scriptSys.VOLTAGE == 0 : #si actula la proteccion cargo la Batery
+        if scriptSys.VOLTAGE < vMargin : #si actula la proteccion cargo la Batery
             scriptSys.GENERAL['mode'] = 'CHARGE'
             scriptSys.TIME_INIT = scriptSys.TIME
             print "CHARGE,"+ vCharge1 +","+ iCharge1
@@ -320,15 +262,12 @@ def stress_test() :
         if  actual_time >= tTestD :
             evaluate()
             return
-
         if  actual_time >= (tTestC- tMargin)and actual_time <(tTestC + tMargin):
             print "PAUSE"
             return
-
         if  actual_time >=(tTestB - tMargin)and actual_time <(tTestB + tMargin):
             print "DISCHARGE,"+ iDischargeTest2
             return
-
         if  actual_time >=(tTestA - tMargin)and actual_time <(tTestA + tMargin):
             print "PAUSE"
             return

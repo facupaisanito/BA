@@ -42,66 +42,7 @@ try:
 except:
     print "ERROR Param-scriptDebug en scriptInc !!"
     sys.exit()
-################################################################
-##########                  FINAL REPORT              ##########
-################################################################
-#Setup
-#
-def final_report(mode, value) :
-    try:
-        if scriptSys.GENERAL['mode'] != 'END' : #si es `llamado por primera vez
-            scriptSys.GENERAL['mode'] = 'END'
-            scriptSys.TIME_INIT = scriptSys.TIME
-        if mode == 0 :
-            print "STOP,NTF,75,"+ scriptSys.EVAL['int_z']
-            scriptSys.GUI['line1'] = "Analysis Finished"
-            scriptSys.GUI['line2'] = "Health: ---    Internal Z: " \
-                + str(scriptSys.EVAL['int_z']) + "mOhm"
-            scriptSys.GUI['bgcolor'] = '"120,244,183"'
-            scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
-                +" Z2="+scriptSys.EVAL['int_z2']
-        if mode == "soh" :
-            print "STOP,NTF,"+str(value)+","+ scriptSys.EVAL['int_z']
-            scriptSys.GUI['line1'] = "Analysis Finished"
-            scriptSys.GUI['line2'] = "Health: "+str(value)+"    Internal Z: " \
-                + str(scriptSys.EVAL['int_z']) + "mOhm"
-            scriptSys.GUI['bgcolor'] = '"120,244,183"'
-            scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
-                +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
-        if mode == "maxTimeCharge" :
-            scriptSys.GENERAL['mode']= "STOP"
-            print "STOP"
-            scriptSys.GUI['line1'] = "Analysis Stopped"
-            scriptSys.GUI['line2'] = "Max time of CHARGE reached"
-            scriptSys.GUI['bgcolor'] = '"244,0,0"'
-            scriptSys.GUI['extra_info'] = "This is scriptTest.py"
-        if mode == "maxTimeDischarge" :
-            scriptSys.TIME_INIT = scriptSys.TIME
-            scriptSys.GENERAL['mode']= "STOP"
-            print "STOP"
-            scriptSys.GUI['line1'] = "Analysis Stopped"
-            scriptSys.GUI['line2'] = "Max time of DISCHARGE reached"
-            scriptSys.GUI['bgcolor'] = '"244,0,0"'
-            scriptSys.GUI['extra_info'] = "This is scriptTest.py"
-        if mode == "SoHok" :
-            print "STOP,NTF,"+str(value)+","+ scriptSys.EVAL['int_z']
-            scriptSys.GUI['line1'] = "Analysis Finished"
-            scriptSys.GUI['line2'] = "No trouble found"
-            scriptSys.GUI['bgcolor'] = '"120,244,183"'
-            scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
-                +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
-        if mode == "SoHfail" :
-            print "STOP,FAIL,"+str(value)+","+ scriptSys.EVAL['int_z']
-            scriptSys.GUI['line1'] = "Analysis Finished"
-            scriptSys.GUI['line2'] = "Fail"
-            scriptSys.GUI['bgcolor'] = '"120,244,183"'
-            scriptSys.GUI['extra_info'] = " Z1="+scriptSys.EVAL['int_z1'] \
-                +" Z2="+scriptSys.EVAL['int_z2']+" SoH=" + str(value)
-        scriptSys.ini_Update()
-        scriptSys.copy_report()
-        return
-    except:
-        scriptSys.error_report("final_report()")
+
 ################################################################
 ##########                  line1                     ##########
 ################################################################
@@ -156,7 +97,7 @@ def measure_z1() :
 
         actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
         if  actual_time >= tTestD :
-            final_report(0,0)
+            scriptSys.final_report(0,0)
             return
 
         if  actual_time >= (tTestC- tMargin)and actual_time <(tTestC + tMargin):
@@ -205,7 +146,7 @@ def measure_z2() :
         actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
         if  actual_time >= tTestD2 :
             # deja reposar y chequea q no caiga la tension
-            # final_report(0,0)
+            # scriptSys.final_report(0,0)
             # stress_test()
             scriptSys.GENERAL['mode'] = 'CHARGE'
             scriptSys.TIME_INIT = scriptSys.TIME
@@ -296,13 +237,14 @@ tTestA  =   tTest1
 tTestB  =   tTest1 + tTest2
 tTestC  =   tTest1 + tTest2 + tTest3
 tTestD  =   tTest1 + tTest2 + tTest3 + tTest4
-iCharge1 =          	'0.5'
-vCharge1 =          	'4.2'
-iDischargeTest1 =       	'1.5'
-iDischargeTest2 =       	'1.0'
+iCharge1 =          '0.5'
+vCharge1 =          '4.2'
+iDischargeTest1 =   '1.5'
+iDischargeTest2 =   '1.0'
 tMaxStress =     	4 * 60 * 60 # 4 hr
-vMar = 16
-lowVoltageLimit = 3000
+vMargin =           16
+lowVoltageLimit =   3000
+maxTimeInitFail =   40          # 10 seg
 #
 def stress_test() :
     try:
@@ -311,14 +253,16 @@ def stress_test() :
             scriptSys.TIME_INIT = scriptSys.TIME
             print "DISCHARGE,"+ iDischargeTest1
             return
-
+        if  scriptSys.VOLTAGE <= vMargin:
+            scriptSys.final_report("maxTimeInitFail",0)
+            return
         if scriptSys.VOLTAGE <= lowVoltageLimit: #si actula la proteccion cargo la Batery
             evaluate()
             return
 
         actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
         if  actual_time >= tMaxStress :
-            final_report("tMaxStress",0)
+            scriptSys.final_report("tMaxStress",0)
             return
 
         print "RUN"
@@ -340,11 +284,23 @@ slope   = 9.2
 origin  = 19158
 def evaluate() :
     try:
+        capacityVectoAmps   = 0
+        capacityVectorAh    = 0
+        capacityVectoWatt   = 0
+        for line in scriptSys.data:
+            i = int(line['CURRENT'])
+            t = int(line['TIME'])
+            if i >= (iDischTest1 - iMar) and i <=(iDischTest1 + iMar) \
+                and (t > scriptSys.TIME_INIT):
+                capacityVectoAmps += int(line['CURRENT'])
+                capacityVectoWatt += int(line['CURRENT']) * int(line['VOLTAGE'])
+        capacityAh = int(capacityVectoAmps / (1000*3600)) #/1000x mAmp y 3600xHr
+        capacityWh = int(capacityVectoAmps / (1000000*3600))
         # scriptSys.import_data()
         result = (scriptSys.TIME - scriptSys.TIME_INIT)
         #regresion lineal
         SoH = int((result * slope + origin)/1000)
-        final_report("soh",SoH)
+        scriptSys.final_report("sohAW",SoH,capacityAh,capacityWh)
         return
     except:
         scriptSys.error_report("evaluate()")
