@@ -154,9 +154,17 @@ def final_report(mode, *value) :
         if mode == 0 :
             print "STOP,NTF,75,0"
             GUI['line1'] = "Analysis Finished"
+<<<<<<< refs/remotes/origin/master
             GUI['line2'] = "Test exit"
             GUI['bgcolor'] = '"120,244,183"'
             GUI['extra_info'] = " Z1="
+=======
+            GUI['line2'] = "Health: ---    Internal Z: " \
+                + str(EVAL['int_z']) + "mOhm"
+            GUI['bgcolor'] = '"120,244,183"'
+            GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
+                +" Z2="+EVAL['int_z2']
+>>>>>>> Bat Activate
         if mode == "soh" :
             print "STOP,NTF,"+str(value[0])+","+ EVAL['int_z']
             GUI['line1'] = "Analysis Finished"
@@ -215,7 +223,11 @@ def final_report(mode, *value) :
         # return
     except:
         error_report("final_report()")
+<<<<<<< refs/remotes/origin/master
     return
+=======
+    sys.exit()
+>>>>>>> Bat Activate
 ################################################################
 ##########                  import_data                ##########
 ################################################################

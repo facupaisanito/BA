@@ -92,6 +92,7 @@ def measure_z1() :
         if scriptSys.GENERAL['mode'] != 'Z_MEASURE' : #si es 1 llamado
             scriptSys.GENERAL['mode'] = 'Z_MEASURE'
             scriptSys.TIME_INIT = scriptSys.TIME
+<<<<<<< refs/remotes/origin/master
             print "CHARGE,4.2,1.8"
             return
         ent = int(scriptSys.GENERAL['entradas'])
@@ -157,6 +158,73 @@ def measure_z1() :
             print "DISCHARGE,1.0"
             return
         if  ent >= 3:
+=======
+            print "DISCHARGE,1.5"
+            return
+
+        actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
+        if  actual_time >= tTestD :
+            scriptSys.final_report(0,0)
+            return
+        if  actual_time >= 600:
+            print "CHARGE,4.2,1.8"
+            return
+        if  actual_time >= 570:
+            print "PAUSE"
+            return
+        if  actual_time >= 540:
+            print "DISCHARGE,1.5"
+            return
+        if  actual_time >= 510:
+            print "PAUSE"
+            return
+        if  actual_time >= 480:
+            print "CHARGE,4.2,1.8"
+            return
+        if  actual_time >= 450:
+            print "PAUSE"
+            return
+        if  actual_time >= 420:
+            print "DISCHARGE,1.5"
+            return
+        if  actual_time >= 390:
+            print "PAUSE"
+            return
+        if  actual_time >= 360:
+            print "CHARGE,4.2,1.8"
+            return
+        if  actual_time >= 330:
+            print "PAUSE"
+            return
+        if  actual_time >= 300:
+            print "DISCHARGE,1.5"
+            return
+        if  actual_time >= 270:
+            print "PAUSE"
+            return
+        if  actual_time >= 240:
+            print "CHARGE,4.2,1.8"
+            return
+        if  actual_time >= 210:
+            print "PAUSE"
+            return
+        if  actual_time >= 180:
+            print "DISCHARGE,1.5"
+            return
+        if  actual_time >= 150:
+            print "PAUSE"
+            return
+        if  actual_time >= 120:
+            print "CHARGE,4.2,1.8"
+            return
+        if  actual_time >= 90:
+            print "PAUSE"
+            return
+        if  actual_time >= 60:
+            print "DISCHARGE,1.5"
+            return
+        if  actual_time >= 30:
+>>>>>>> Bat Activate
             print "PAUSE"
             return
         print "RUN"
