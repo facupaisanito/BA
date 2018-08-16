@@ -70,11 +70,7 @@ iDischarge4 =       	'0.5'
 def init_state() :
     try:
         if scriptSys.TIME >= maxTimeInit and scriptSys.VOLTAGE > vMargin:
-<<<<<<< refs/remotes/origin/master
             scriptInc.measure_z1()
-=======
-            charge_state(1)
->>>>>>> Bat Activate
             return
         if scriptSys.TIME >= maxTimeInitFail and scriptSys.VOLTAGE <= vMargin:
             scriptSys.final_report("F01",0)
