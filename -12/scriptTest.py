@@ -73,6 +73,8 @@ VBAJA   = 3200
 ################################################################
 def init_state() :
     try:
+        scriptSys.final_report("F02",0)
+
         if int(scriptSys.TIME) >= maxTimeInit :
             if scriptSys.VOLTAGE > VALTA :scriptSys.GENERAL['vstate'] = "vALTA"
             if scriptSys.VOLTAGE < VBAJA :scriptSys.GENERAL['vstate'] = "vBAJA"

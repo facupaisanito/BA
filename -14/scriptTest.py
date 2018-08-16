@@ -39,23 +39,21 @@ for px in sys.argv:
 ##########                  SETUP                     ##########
 ################################################################
 umbralVoltTarget =  	4100
-umbralCurrentTarget =   300
+umbralCurrentTarget =   400
 umbralVoltHigh =    	umbralVoltTarget
 umbralVoltLow =     	3200
 umbralVolt =        	umbralVoltTarget * 0.03
 maxTimeInit =       	20          # 10 seg
+maxTimeInitFail =      	40          # 10 seg
 maxTimeDischarge =  	30 * 60     # 30 min
 minTimeDischarge =  	60
-maxTimeChargeHig =     	1 * 60 * 60 #  hr
-maxTimeChargeMed =     	2 * 60 * 60 #  hr
-maxTimeChargeLow =     	4 * 60 * 60 #  hr
-minTimeCharge =     	5 * 60
-maxTimeCond =       	45          # 10 seg
+maxTimeCharge =     	4 * 60 * 60 # 1 hr
+minTimeCharge =     	2 * 60
+maxTimeCond =       	60          # 10 seg
 tMargin =               3
 vMargin =               16
-iMargin =               16
 iCharge1 =          	'0.5'
-iCharge2 =          	'1.8'
+iCharge2 =          	'1.5'
 iCharge3 =          	'1.3'
 iCharge4 =          	'1.0'
 vCharge1 =          	'4.1'
@@ -66,32 +64,28 @@ iDischarge1 =       	'1.6'
 iDischarge2 =       	'1.3'
 iDischarge3 =       	'1.0'
 iDischarge4 =       	'0.5'
-VALTA   = 3800
-VBAJA   = 3200
 ################################################################
 ##########                  INIT                      ##########
 ################################################################
 def init_state() :
     try:
-        scriptSys.final_report("F02",0)
-
-        if int(scriptSys.TIME) >= maxTimeInit :
-            if scriptSys.VOLTAGE > VALTA :scriptSys.GENERAL['vstate'] = "vALTA"
-            if scriptSys.VOLTAGE < VBAJA :scriptSys.GENERAL['vstate'] = "vBAJA"
-            else :                        scriptSys.GENERAL['vstate'] = "vMEDIA"
-
-            if scriptSys.CURRENT >iMargin or scriptSys.CURRENT < (-iMargin):
-                scriptSys.final_report("F01",0)
-
-            if scriptSys.VOLTAGE < vMargin:
-                charge_state(0)
-                return
-            if scriptSys.VOLTAGE <= umbralVoltLow:
-                charge_state(0)
-                return
-            if scriptSys.VOLTAGE >  umbralVoltLow:
-                stress_state()
-                return
+        if scriptSys.TIME >= maxTimeInit and scriptSys.VOLTAGE > vMargin:
+            scriptInc.measure_z1()
+            return
+        if scriptSys.TIME >= maxTimeInitFail and scriptSys.VOLTAGE <= vMargin:
+            scriptSys.final_report("F01",0)
+            return
+            # if scriptSys.VOLTAGE <= umbralVoltLow:
+            #     charge_state(1)
+            #     return
+            # if scriptSys.VOLTAGE > umbralVoltLow:
+            #     stress_state()
+            #     return
+            #
+            # if scriptSys.VOLTAGE < umbralVoltHigh and \
+            #     scriptSys.VOLTAGE > umbralVoltLow:
+            #     stress_state()
+            #     return
         print "RUN"
         return
     except:
@@ -104,49 +98,34 @@ def charge_state(number) :
         if not scriptSys.GENERAL['mode'] == 'CHARGE' : #si es llamado por 1 vez
             scriptSys.GENERAL['mode'] = 'CHARGE'
             scriptSys.TIME_INIT = scriptSys.TIME
+            # if (umbralVoltTarget - scriptSys.VOLTAGE) <(0.1*umbralVoltTarget):
+            #     number = 4
+            # elif (umbralVoltTarget -scriptSys.VOLTAGE)<(0.2*umbralVoltTarget):
+            #     number = 3
+            # elif (umbralVoltTarget -scriptSys.VOLTAGE)<(0.4*umbralVoltTarget):
+            #     number = 2
+            # else:
+            #     number = 1
+            # if number == 4 : print "CHARGE,"+ vCharge4 +","+ iCharge4
+            # if number == 3 : print "CHARGE,"+ vCharge3 +","+ iCharge3
+            # if number == 1 :
             print "CHARGE,"+ vCharge1 +","+ iCharge1
             return
+        if  scriptSys.VOLTAGE < (int(1000*float(vCharge2)) + vMargin) and \
+            scriptSys.VOLTAGE > (int(1000*float(vCharge2)) - vMargin) and \
+            scriptSys.CURRENT < vMargin:
+            scriptSys.final_report(0)
 
-        if (scriptSys.TIME - scriptSys.TIME_INIT) <= maxTimeInit:
-            print "CHARGE,"+ vCharge2 +","+ iCharge2
-            return
-        if  scriptSys.CURRENT < (umbralCurrentTarget) and \
+        if  scriptSys.CURRENT <= (umbralCurrentTarget) and \
             (scriptSys.TIME - scriptSys.TIME_INIT) >= minTimeCharge:
             cond_state()
             return
 
-        #condiciones de Fallas:
-
-        if scriptSys.CURRENT < iMargin :
-            scriptSys.final_report("F02",0)
-        if scriptSys.CURRENT < iMargin and \
-            scriptSys.VOLTAGE > (int(1000*float(vCharge2))-100) :
-            scriptSys.final_report("F03",0)
-        if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeInit:
-            slope = scriptSys.get_slope(range(scriptSys.TIME_INIT + 3,scriptSys.TIME))
-            if scriptSys.GENERAL['vstate'] == "vBAJA" and not slope['VOLTAGE'] > -80 \
-                and scriptSys.CURRENT > (int(1000*float(iCharge2))-200):
-                scriptSys.final_report("F04",0)
-            if scriptSys.GENERAL['vstate'] == "vMEDIA" and not slope['VOLTAGE'] > -80\
-                and scriptSys.CURRENT > (int(1000*float(iCharge2))-200):
-                scriptSys.final_report("F05",0)
-            if scriptSys.GENERAL['vstate'] == "vALTA" and not slope['CURRENT'] < 80\
-                and scriptSys.VOLTAGE > (int(1000*float(vCharge2))-200):
-                scriptSys.final_report("F06",0)
-            if slope['VOLTAGE'] > 0 and slope['CURRENT'] < 80 :
-                scriptSys.final_report("F07",0)
-            if slope['VOLTAGE'] < 100 :
-                scriptSys.final_report("F08",0)
-        if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeChargeLow and \
-            scriptSys.GENERAL['vstate'] == "vBAJA" :
-            scriptSys.final_report("F09",0)
-        if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeChargeMed and \
-            scriptSys.GENERAL['vstate'] == "vMEDIA" :
-            scriptSys.final_report("F10",0)
-        if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeChargeHig and \
-            scriptSys.GENERAL['vstate'] == "vALTA" :
-            scriptSys.final_report("F11",0)
-        print "RUN"
+        if (int(scriptSys.TIME) - int(scriptSys.TIME_INIT)) >= maxTimeCharge :
+            scriptSys.final_report("maxTimeCharge")
+            return
+        # print "RUN"
+        print "CHARGE,"+ vCharge2 +","+ iCharge2
         return
     except:
         scriptSys.error_report("charge_state()")
@@ -167,15 +146,9 @@ def discharge_state(number) :
             and (scriptSys.TIME - scriptSys.TIME_INIT) >= minTimeDischarge:
             cond_state()
             return
-        #condiciones de Fallas:
-        if scriptSys.CURRENT > (-iMargin) and scriptSys.VOLTAGE < vMargin :
-            scriptSys.final_report("F12",0)
-        if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeInit:
-            slope = scriptSys.get_slope(range(scriptSys.TIME_INIT + 3,scriptSys.TIME))
-            if slope['VOLTAGE']  > 80 and slope['CURRENT'] > 180 :
-                scriptSys.final_report("F13",0)
-        if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeDischarge:
-            scriptSys.final_report("F15",0)
+
+        if (int(scriptSys.TIME) - int(scriptSys.TIME_INIT)) >= maxTimeDischarge:
+            scriptSys.final_report("maxTimeDischarge")
             return
         print "RUN"
         return
@@ -195,17 +168,27 @@ def cond_state():
         if  ((scriptSys.TIME) - (scriptSys.TIME_INIT)) >= (maxTimeCond-tMargin):
             stress_state()
             return
+        if  scriptSys.VOLTAGE < (int(1000*float(vCharge2)) + vMargin) and \
+            scriptSys.VOLTAGE > (int(1000*float(vCharge2)) - vMargin) and \
+            scriptSys.CURRENT < vMargin:
+            scriptSys.final_report(0)
+            # if scriptSys.VOLTAGE < umbralVoltLow:
+            #     charge_state(2)
+            #     scriptSys.ini_Update()
+            #     sys.exit()
+            #     return
+            #
+            # scriptInc.already_charged()
 
-        #condiciones de Fallas:
-        if scriptSys.CURRENT > (-iMargin) and scriptSys.VOLTAGE < vMargin :
-            scriptSys.final_report("F18",0)
-        if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeInit:
-            slope = scriptSys.get_slope(range(scriptSys.TIME_INIT + 3,scriptSys.TIME))
-            if slope['VOLTAGE']  < 80 :
-                scriptSys.final_report("F19",0)
-        if scriptSys.CURRENT >iMargin or scriptSys.CURRENT < (-iMargin):
-            scriptSys.final_report("F20",0)
-
+            # if scriptSys.VOLTAGE > umbralVoltHigh:
+            #     discharge_state(2)
+            #     scriptSys.ini_Update()
+            #     sys.exit()
+            # if scriptSys.VOLTAGE < umbralVoltHigh and \
+            #     scriptSys.VOLTAGE > umbralVoltLow:
+            #     scriptInc.measure_z1()
+            #     scriptSys.ini_Update()
+            #     sys.exit()
         print "RUN"
         return
     except:
