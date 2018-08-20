@@ -216,19 +216,19 @@ def final_report(mode, *value) :
                 +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
 
         if mode == "F01" :
-            print "STOP,FAIL,0,01"
+            print "STOP,FAIL,0,0"
             GUI['line1'] = "Analysis Fail"
             GUI['line2'] = "Error n F01"
             GUI['bgcolor'] = '"244,0,0"'
             GUI['extra_info'] = "none"
         if mode == "F02" :
-            print "STOP,FAIL,0,02"
+            print "STOP,FAIL,0,0"
             GUI['line1'] = "Analysis Fail"
             GUI['line2'] = "Error n F02"
             GUI['bgcolor'] = '"244,0,0"'
             GUI['extra_info'] = "none"
         if mode == "F03" :
-            print "STOP,FAIL,0,03"
+            print "STOP,0,0,0"
             GUI['line1'] = "Analysis Fail"
             GUI['line2'] = "Error n F03"
             GUI['bgcolor'] = '"244,0,0"'
