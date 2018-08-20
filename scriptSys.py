@@ -67,25 +67,31 @@ def ini_Update ():
         with open(PATH+STATION_N+'.ini', 'w') as configfile:
             config.write(configfile)
         return
-    except:
+    except Exception as e:
         # print "STOP,FAIL,0,0"
         print "Script ERROR:ini_Update()"
+        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
+    return
 ################################################################
 ##########                  ERROR REPORT              ##########
 ################################################################
-def error_report(string):
+def error_report(e,string):
     try:
         print "STOP"
+
+        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
         # print "Script ERROR: " + str(string)
+        # err = str('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
         #
-        GUI['line1'] = "Script ERROR"
-        GUI['line2'] = "Conflict part :"+ str(string)
+        GUI['line1'] = "Script ERROR: "+ str(string)
+        GUI['line2'] = ""
         GUI['bgcolor'] = '"244,10,10"'
         GUI['extra_info'] = " TIME="+str(TIME)+" Tinit="+str(TIME_INIT)
         ini_Update()
-    except:
+    except Exception as e:
         print "error_report() ERROR"
-    sys.exit()
+        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
+    return
 ################################################################
 ##########                  COPY REPORT               ##########
 ################################################################
@@ -140,8 +146,8 @@ def copy_report() :
             print "el copy no funciono csv2"
         #
         return
-    except:
-        error_report("copy_report()")
+    except Exception as e:
+        error_report(e,"copy_report()")
 ################################################################
 ##########                  FINAL REPORT              ##########
 ################################################################
@@ -179,17 +185,17 @@ def final_report(mode, *value) :
             GUI['bgcolor'] = '"244,0,0"'
             GUI['extra_info'] = "This is scriptTest.py"
         if mode == "SoHok" :
-            print "STOP,NTF,"+str(value[0])+","+ EVAL['int_z']
+            print "STOP,NTF,"+str(value[0])+",0"
             GUI['line1'] = "Analysis Finished"
-            GUI['line2'] = "No trouble found"
+            GUI['line2'] = "No trouble found :"+str(value[0])+"%"
             GUI['bgcolor'] = '"120,244,183"'
             GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
                 +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
         if mode == "SoHfail" :
-            print "STOP,FAIL,"+str(value[0])+","+ EVAL['int_z']
+            print "STOP,FAIL,"+str(value[0])+",0"
             GUI['line1'] = "Analysis Finished"
-            GUI['line2'] = "Fail"
-            GUI['bgcolor'] = '"120,244,183"'
+            GUI['line2'] = "Fail  :"+str(value[0])+"%"
+            GUI['bgcolor'] = '"244,244,183"'
             GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
                 +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
         if mode == "sohAW" :
@@ -329,12 +335,18 @@ def final_report(mode, *value) :
             GUI['line2'] = "Error n F20"
             GUI['bgcolor'] = '"244,0,0"'
             GUI['extra_info'] = "none"
-        ini_Update()
-        copy_report()
+        if mode == "F21" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Error n F21"
+            GUI['bgcolor'] = '"244,0,0"'
+            GUI['extra_info'] = "none"
         # return
-    except:
-        error_report("final_report()")
-    sys.exit()
+    except Exception as e:
+        error_report(e,"final_report()")
+    ini_Update()
+    copy_report()
+    return
 ################################################################
 ##########                  import_data                ##########
 ################################################################
@@ -369,8 +381,8 @@ def import_data():
                     data.insert(ind,temp)
         GENERAL['line_b'] = str(holes)
         return
-    except:
-        error_report("import_data()")
+    except Exception as e:
+        error_report(e,"import_data()")
 ################################################################
 ##########                  get_data                ##########
 ################################################################
@@ -388,8 +400,8 @@ def get_data(dType, tLapse):
             info = [int(row[dType]) for row in data if int(row['TIME']) == tLapse]
             return info[0]
         return info
-    except:
-        error_report("get_data()")
+    except Exception as e:
+        error_report(e,"get_data()")
 ################################################################
 ##########                  get_slope                ##########
 ################################################################
@@ -412,8 +424,8 @@ def get_slope(tLapse):
         tSlope = ( 1000* dt1) / len(t)
         slope = {"VOLTAGE":vSlope ,"CURRENT": iSlope ,"TEMP": tSlope}
         return slope
-    except:
-        scriptSys.error_report("get_data()")
+    except Exception as e:
+        scriptSys.error_report(e,"get_data()")
 
 ################################################################
 ##########                  get_data                ##########
@@ -475,8 +487,8 @@ def import_ini( STATION_N ):
         for option in config.options('Eval'):
             EVAL[option]=config.get('Eval',option)
         return
-    except:
-        error_report("import_ini()")
+    except Exception as e:
+        error_report(e,"import_ini()")
 
 #####################################################
 #####################################################

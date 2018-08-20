@@ -65,8 +65,8 @@ def get_line(dType, tLapse):
         scriptSys.GENERAL['line_m'] = str(M)
         scriptSys.GENERAL['line_m'] = str(VAR1)
         return
-    except:
-        scriptSys.error_report("get_line()")
+    except Exception as e:
+        scriptSys.error_report(e,"get_line()")
 ################################################################
 ##########                  measure_z1                ##########
 ################################################################
@@ -96,7 +96,7 @@ def measure_z1() :
 
         actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
         if  actual_time >= tTestD :
-            final_report(0,0)
+            scriptSys.final_report(0,0)
             return
 
         if  actual_time >= (tTestC- tMargin)and actual_time <(tTestC + tMargin):
@@ -113,8 +113,8 @@ def measure_z1() :
             return
         print "RUN"
         return
-    except:
-        scriptSys.error_report("measure_z1()")
+    except Exception as e:
+        scriptSys.error_report(e,"measure_z1()")
 ################################################################
 ##########                  measure_z2                ##########
 ################################################################
@@ -210,26 +210,27 @@ def measure_z2() :
             return
         print "RUN"
         return
-    except:
-        scriptSys.error_report("measure_z2()")
+    except Exception as e:
+        scriptSys.error_report(e,"measure_z2()")
 ################################################################
 ##########                  STRESS                    ##########
 ################################################################
 
 #Setup
-tTest1  =   20  #tiempo de descarga suave
-tTest2  =   120  #tiempo de descarga fuerte
-tTest3  =   400  #tiempo de recuperacion
-tTest4  =   180 #tiempo de chequeo e incio de sig etapa
-tTest5  =   20
 # tTest1  =   20  #tiempo de descarga suave
-# tTest2  =   10  #tiempo de descarga fuerte
-# tTest3  =   40  #tiempo de recuperacion
-# tTest4  =   30 #tiempo de chequeo e incio de sig etapa
+# tTest2  =   120  #tiempo de descarga fuerte
+# tTest3  =   400  #tiempo de recuperacion
+# tTest4  =   180 #tiempo de chequeo e incio de sig etapa
 # tTest5  =   20
-vMargin =               16
-iMargin =               16
+tTest1  =   20  #tiempo de descarga suave
+tTest2  =   10  #tiempo de descarga fuerte
+tTest3  =   40  #tiempo de recuperacion
+tTest4  =   30 #tiempo de chequeo e incio de sig etapa
+tTest5  =   20
+vMargin =   16
+iMargin =   16
 tMargin =   4   #margen de tiempo por no ser 10s exactos
+maxTimeInit = 20          # 10 seg
 # voltageAverage = 3
 # currentAverage = 5
 # Z1 = 0
@@ -254,9 +255,18 @@ def stress_test() :
         if scriptSys.GENERAL['mode'] != 'STRESS' : #si es llamado por 1
             scriptSys.GENERAL['mode'] = 'STRESS'
             scriptSys.TIME_INIT = scriptSys.TIME
-
             print "DISCHARGE,"+ iDischargeTest1
             return
+
+        #condiciones de Fallas:
+        if scriptSys.CURRENT > (-iMargin) and scriptSys.VOLTAGE < vMargin :
+            scriptSys.final_report("F12",0)
+            return
+        # if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeInit:
+        #     slope = scriptSys.get_slope(range(scriptSys.TIME_INIT + 3,scriptSys.TIME))
+        #     if slope['VOLTAGE']  > 80 and slope['CURRENT'] > 180 :
+        #         scriptSys.final_report("F13",0)
+        #         return
 
         actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
         if  actual_time >= tTestD :
@@ -273,8 +283,8 @@ def stress_test() :
             return
         print "RUN"
         return
-    except:
-        scriptSys.error_report("stress_test()")
+    except Exception as e:
+        scriptSys.error_report(e,"stress_test()")
 ################################################################
 ##########                  EVALUATE                  ##########
 ################################################################
@@ -338,12 +348,12 @@ def evaluate() :
         result = factor1 * Vd1 + factor2 * Vd2 + factor3 * Vd3 + factor4 * Vd4
         SoH = int((result * slope + origin)/1000)
         if SoH >= Boundary:
-            final_report("SoHok",SoH)
+            scriptSys.final_report("SoHok",SoH)
         else:
-            final_report("SoHfail",SoH)
+            scriptSys.final_report("SoHfail",SoH)
         return
-    except:
-        scriptSys.error_report("evaluate()")
+    except Exception as e:
+        scriptSys.error_report(e,"evaluate()")
 
 
 
@@ -373,4 +383,4 @@ def already_charged(option) :
         scriptSys.copy_report()
         return
     except:
-        scriptSys.error_report("already_charged()")
+        scriptSys.error_report(e,"already_charged()")

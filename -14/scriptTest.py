@@ -201,7 +201,7 @@ def zmeasure_state() :
         scriptInc.measure_z1()
         return
     except:
-        scriptSys.error_report("zmeasure_state()")
+        scriptSys.error_report("zmeasure_state1()")
 ################################################################
 ##########                  Z_MEASURE                 ##########
 ################################################################

@@ -92,71 +92,71 @@ def measure_z1() :
         if scriptSys.GENERAL['mode'] != 'Z_MEASURE' : #si es 1 llamado
             scriptSys.GENERAL['mode'] = 'Z_MEASURE'
             scriptSys.TIME_INIT = scriptSys.TIME
-            print "DISCHARGE,1.0"
+            print "CHARGE,4.2,1.8"
             return
-
+        ent = int(scriptSys.GENERAL['entradas'])
         actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
-        if  actual_time >= 600 :
+        if  ent >= 63 :
             scriptSys.final_report(0,0)
             return
-        if  actual_time >= 570:
+        if  ent >= 60:
             print "CHARGE,4.2,1.8"
             return
-        if  actual_time >= 540:
+        if  ent >= 57:
             print "PAUSE"
             return
-        if  actual_time >= 510:
+        if  ent >= 54:
             print "DISCHARGE,1.0"
             return
-        if  actual_time >= 480:
+        if  ent >= 51:
             print "PAUSE"
             return
-        if  actual_time >= 450:
+        if  ent >= 48:
             print "CHARGE,4.2,1.8"
             return
-        if  actual_time >= 420:
+        if  ent >= 45:
             print "PAUSE"
             return
-        if  actual_time >= 390:
+        if  ent >= 42:
             print "DISCHARGE,1.0"
             return
-        if  actual_time >= 360:
+        if  ent >= 39:
             print "PAUSE"
             return
-        if  actual_time >= 330:
+        if  ent >= 36:
             print "CHARGE,4.2,1.8"
             return
-        if  actual_time >= 300:
+        if  ent >= 33:
             print "PAUSE"
             return
-        if  actual_time >= 270:
+        if  ent >= 30:
             print "DISCHARGE,1.0"
             return
-        if  actual_time >= 240:
+        if  ent >= 27:
             print "PAUSE"
             return
-        if  actual_time >= 210:
+        if  ent >= 24:
             print "CHARGE,4.2,1.8"
             return
-        if  actual_time >= 180:
+        if  ent >= 21:
             print "PAUSE"
             return
-        if  actual_time >= 150:
+        if  ent >= 18:
             print "DISCHARGE,1.0"
             return
-        if  actual_time >= 120:
+        if  ent >= 15:
             print "PAUSE"
             return
-        if  actual_time >= 90:
+        if  ent >= 12:
             print "CHARGE,4.2,1.8"
             return
-        if  actual_time >= 30:
+        if  ent >= 9:
             print "PAUSE"
             return
-        if  actual_time >= 60:
+        if  ent >= 6:
             print "DISCHARGE,1.0"
             return
-        if  actual_time >= 30:
+        if  ent >= 3:
             print "PAUSE"
             return
         print "RUN"
