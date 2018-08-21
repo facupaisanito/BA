@@ -43,7 +43,7 @@ umbralCurrentTarget =   300
 umbralVoltHigh =    	umbralVoltTarget
 umbralVoltLow =     	3200
 umbralVolt =        	umbralVoltTarget * 0.03
-maxTimeInit =       	20          # 10 seg
+maxTimeInit =       	15          # 10 seg
 maxTimeTest =           7 * 60 * 60 #  hr
 maxTimeDischarge =  	30 * 60     # 30 min
 minTimeDischarge =  	60
@@ -89,8 +89,6 @@ def init_state() :
                 charge_state(0)
                 return
             if scriptSys.VOLTAGE >  umbralVoltLow:
-                # print "paso por aca"
-                # scriptSys.final_report("F22",0)
                 stress_state()
                 return
         print "RUN"

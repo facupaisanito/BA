@@ -189,17 +189,17 @@ def final_report(mode, *value) :
             GUI['bgcolor'] = '"244,0,0"'
             GUI['extra_info'] = "This is scriptTest.py"
         if mode == "SoHok" :
-            print "STOP,NTF,"+str(value[0])+",0"
+            print "STOP,NTF,0,0"
             GUI['line1'] = "Analysis Finished"
             GUI['line2'] = "No trouble found" #+" :"+str(value[0])+"%"
-            GUI['bgcolor'] = '"120,244,183"'
+            GUI['bgcolor'] = '"20,178,120"'
             GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
                 +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
         if mode == "SoHfail" :
-            print "STOP,FAIL,"+str(value[0])+",0"
+            print "STOP,FAIL,0,0"
             GUI['line1'] = "Analysis Finished"
             GUI['line2'] = "Fail "#+" :"+str(value[0])+"%"
-            GUI['bgcolor'] = '"244,244,183"'
+            GUI['bgcolor'] = '"237,55,82"'
             GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
                 +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
         if mode == "sohAW" :
@@ -502,7 +502,6 @@ def import_ini( STATION_N ):
         # config.write(config)
         # config.close()
         try:
-            # print PATH + STATION_N + '.ini'
             with open(PATH + STATION_N + '.ini', 'wb') as configfile:
                 config.write(configfile)
         except Exception as e:
@@ -516,7 +515,6 @@ def import_ini( STATION_N ):
             EVAL[option]=config.get('Eval',option)
         for option in config.options('Msg'):
             MENSSAGE[option]=config.get('Msg',option)
-        # print "por aca va bien"
         return
     except Exception as e:
         error_report(e,"import_ini()")
@@ -545,16 +543,12 @@ try:
         f.readline()
         reader = csv.DictReader(f, delimiter=',')
         header = reader.fieldnames
-        # try:
-        #     lastlines = list(reader)[-10:]
-        #     for i in range(10):
-        #         if int(lastlines[i]['MSG']) == 81:
-        #             Msg = 81
-        # except:
-        #     print "ERROR AL CONSULTAR MENSAJE"
-        # reader = csv.DictReader(f, delimiter=',')
         try:
-            last3lines = list(reader)[-3:]
+            try:
+                lastlines = list(reader)[-10:]
+            except :
+                lastlines = list(reader)[-9:]
+            last3lines = lastlines
             voltage = int(last3lines[0]['VOLTAGE'])
             voltage += int(last3lines[1]['VOLTAGE'])
             voltage += int(last3lines[2]['VOLTAGE'])
@@ -589,6 +583,28 @@ try:
 
         try :    GENERAL['entradas'] = str(int(GENERAL['entradas'])+1)
         except : GENERAL['entradas'] = "1.0"
+
+        # with open(PATH + STATION_N + ".csv",'rb') as f:
+        #     f.readline()
+        #     f.readline()
+        #     reader = csv.DictReader(f, delimiter=',')
+        # header = reader.fieldnames
+        try:
+            # print list(reader)
+            # print list(reader)[-5:]
+            if TIME < 10:
+                for i in range(5):
+                    if int(lastlines[i]['MSG']) == 81:
+                        Msg =81
+            else:
+                for i in range(10):
+                    if int(lastlines[i]['MSG']) == 81:
+                        Msg = 81
+        except Exception as e:
+            # print "STOP,FAIL,0,0"
+            print "Script ERROR:ini_Update()"
+            print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
+
         ini_Update()
     pass
 except:
