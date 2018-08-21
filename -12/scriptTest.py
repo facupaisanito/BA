@@ -105,20 +105,20 @@ def charge_state(number) :
             scriptSys.TIME_INIT = scriptSys.TIME
             print "CHARGE,"+ vCharge1 +","+ iCharge1
             return
-
-        if (scriptSys.TIME - scriptSys.TIME_INIT) <= maxTimeInit:
-            print "CHARGE,"+ vCharge2 +","+ iCharge2
+        if scriptSys.CURRENT < iMargin and \
+            scriptSys.VOLTAGE > (int(1000*float(vCharge2))-100) :
+            scriptSys.final_report("F03",0)
             return
+        # if (scriptSys.TIME - scriptSys.TIME_INIT) <= maxTimeInit:
+        #     print "CHARGE,"+ vCharge2 +","+ iCharge2
+        #     return
         if  scriptSys.CURRENT < (umbralCurrentTarget) and \
             (scriptSys.TIME - scriptSys.TIME_INIT) >= minTimeCharge:
             cond_state()
             return
 
         #condiciones de Fallas:
-        if scriptSys.CURRENT < iMargin and \
-            scriptSys.VOLTAGE > (int(1000*float(vCharge2))-100) :
-            scriptSys.final_report("F03",0)
-            return
+
         if scriptSys.CURRENT < iMargin :
             scriptSys.final_report("F02",0)
             return
