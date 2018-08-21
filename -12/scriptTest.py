@@ -72,7 +72,6 @@ VBAJA   = 3200
 ################################################################
 ##########                  INIT                      ##########
 ################################################################
-
 def init_state() :
     try:
         if int(scriptSys.TIME) >= maxTimeInit :
@@ -90,6 +89,8 @@ def init_state() :
                 charge_state(0)
                 return
             if scriptSys.VOLTAGE >  umbralVoltLow:
+                # print "paso por aca"
+                # scriptSys.final_report("F22",0)
                 stress_state()
                 return
         print "RUN"
@@ -293,6 +294,9 @@ def end_state():
 ##########                  MAIN                      ##########
 ################################################################
 ################################################################
+if scriptSys.Msg == 81 :
+    scriptSys.final_report("F22",0)
+    sys.exit()
 if  scriptSys.GENERAL['mode'] == "INIT":
     init_state()
 elif scriptSys.GENERAL['mode'] == "CHARGE":

@@ -44,10 +44,12 @@ if DEBUG_MODE : PATH = '../../data/st'
 GENERAL = {}
 GUI = {}
 EVAL = {}
+MENSSAGE = {}
 TIME_INIT = 0
 VOLTAGE = 0
 CURRENT = 0
 TIME = 0
+Msg = 0
 #####################################################
 #####################################################
 #Funciones basicas
@@ -64,6 +66,8 @@ def ini_Update ():
             config.set('GUI',option,GUI[option])
         for option in EVAL:
             config.set('Eval',option,EVAL[option])
+        for option in MENSSAGE:
+            config.set('Msg',option,MENSSAGE[option])
         with open(PATH+STATION_N+'.ini', 'w') as configfile:
             config.write(configfile)
         return
@@ -187,14 +191,14 @@ def final_report(mode, *value) :
         if mode == "SoHok" :
             print "STOP,NTF,"+str(value[0])+",0"
             GUI['line1'] = "Analysis Finished"
-            GUI['line2'] = "No trouble found :"+str(value[0])+"%"
+            GUI['line2'] = "No trouble found" #+" :"+str(value[0])+"%"
             GUI['bgcolor'] = '"120,244,183"'
             GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
                 +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
         if mode == "SoHfail" :
             print "STOP,FAIL,"+str(value[0])+",0"
             GUI['line1'] = "Analysis Finished"
-            GUI['line2'] = "Fail  :"+str(value[0])+"%"
+            GUI['line2'] = "Fail "#+" :"+str(value[0])+"%"
             GUI['bgcolor'] = '"244,244,183"'
             GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
                 +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
@@ -341,6 +345,16 @@ def final_report(mode, *value) :
             GUI['line2'] = "Error n F21"
             GUI['bgcolor'] = '"244,0,0"'
             GUI['extra_info'] = "none"
+        if mode == "F22" :
+            print "STOP,FAIL,0,0"
+            GUI['line1'] = "Analysis Fail"
+            GUI['line2'] = "Battery disconected"
+            GUI['bgcolor'] = '"227,123,64"'
+            GUI['extra_info'] = "none"
+            GUI['extra_info'] = "none"
+            MENSSAGE['type'] = "warning"
+            MENSSAGE['time'] = "60"
+            MENSSAGE['txt'] = "Battery disconected"
         # return
     except Exception as e:
         error_report(e,"final_report()")
@@ -441,6 +455,8 @@ def import_ini( STATION_N ):
             config.add_section('GUI')
         if not 'Eval' in sections :
             config.add_section('Eval')
+        if not 'Msg' in sections :
+            config.add_section('Msg')
         options = config.options('General')
         if not 'entradas' in options :
             config.set('General','entradas','0')
@@ -476,16 +492,31 @@ def import_ini( STATION_N ):
             config.set('Eval','int_z1','')
         if not 'health' in options :
             config.set('Eval','health','')
+        options = config.options('Msg')
+        if not 'type' in options :
+            config.set('Msg','type','')
+        if not 'time' in options :
+            config.set('Msg','time','')
+        if not 'txt' in options :
+            config.set('Msg','txt','')
         # config.write(config)
         # config.close()
-        with open(PATH + STATION_N + '.ini', 'wb') as configfile:
-            config.write(configfile)
+        try:
+            # print PATH + STATION_N + '.ini'
+            with open(PATH + STATION_N + '.ini', 'wb') as configfile:
+                config.write(configfile)
+        except Exception as e:
+            print "config.write(configfile) ERROR"
+            print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
         for option in config.options('General'):
             GENERAL[option]=config.get('General',option)
         for option in config.options('GUI'):
             GUI[option]=config.get('GUI',option)
         for option in config.options('Eval'):
             EVAL[option]=config.get('Eval',option)
+        for option in config.options('Msg'):
+            MENSSAGE[option]=config.get('Msg',option)
+        # print "por aca va bien"
         return
     except Exception as e:
         error_report(e,"import_ini()")
@@ -514,6 +545,14 @@ try:
         f.readline()
         reader = csv.DictReader(f, delimiter=',')
         header = reader.fieldnames
+        # try:
+        #     lastlines = list(reader)[-10:]
+        #     for i in range(10):
+        #         if int(lastlines[i]['MSG']) == 81:
+        #             Msg = 81
+        # except:
+        #     print "ERROR AL CONSULTAR MENSAJE"
+        # reader = csv.DictReader(f, delimiter=',')
         try:
             last3lines = list(reader)[-3:]
             voltage = int(last3lines[0]['VOLTAGE'])
@@ -553,6 +592,6 @@ try:
         ini_Update()
     pass
 except:
-    print "error con el csv"
+    print "error con el csv desde scriptSys"
     sys.exit()
     pass
