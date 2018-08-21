@@ -39,13 +39,13 @@ for px in sys.argv:
 ##########                  SETUP                     ##########
 ################################################################
 umbralVoltTarget =  	4100
-umbralCurrentTarget =   300
+umbralCurrentTarget =   400
 umbralVoltHigh =    	umbralVoltTarget
 umbralVoltLow =     	3200
 umbralVolt =        	umbralVoltTarget * 0.03
 maxTimeInit =       	15          # 10 seg
 maxTimeTest =           7 * 60 * 60 #  hr
-maxTimeDischarge =  	30 * 60     # 30 min
+maxTimeDischarge =  	4 * 30 * 60     # hr
 minTimeDischarge =  	60
 maxTimeChargeHig =     	1 * 60 * 60 #  hr
 maxTimeChargeMed =     	2 * 60 * 60 #  hr
@@ -82,14 +82,8 @@ def init_state() :
             if scriptSys.CURRENT >iMargin or scriptSys.CURRENT < (-iMargin):
                 scriptSys.final_report("F01",0)
                 return
-            if scriptSys.VOLTAGE < vMargin:
+            if scriptSys.CURRENT < (2*iMargin):
                 charge_state(0)
-                return
-            if scriptSys.VOLTAGE <= umbralVoltLow:
-                charge_state(0)
-                return
-            if scriptSys.VOLTAGE >  umbralVoltLow:
-                stress_state()
                 return
         print "RUN"
         return
@@ -109,9 +103,9 @@ def charge_state(number) :
             scriptSys.VOLTAGE > (int(1000*float(vCharge2))-100) :
             scriptSys.final_report("F03",0)
             return
-        # if (scriptSys.TIME - scriptSys.TIME_INIT) <= maxTimeInit:
-        #     print "CHARGE,"+ vCharge2 +","+ iCharge2
-        #     return
+        if (scriptSys.TIME - scriptSys.TIME_INIT) <= maxTimeInit:
+            print "CHARGE,"+ vCharge2 +","+ iCharge2
+            return
         if  scriptSys.CURRENT < (umbralCurrentTarget) and \
             (scriptSys.TIME - scriptSys.TIME_INIT) >= minTimeCharge:
             cond_state()

@@ -205,8 +205,8 @@ def final_report(mode, *value) :
         if mode == "sohAW" :
             print "STOP,NTF,"+str(value[0])+","+ EVAL['int_z']
             GUI['line1'] = "Analysis Finished"
-            GUI['line2'] = "Health: "+str(value[0])+"    Internal Z: " \
-                + str(EVAL['int_z']) + "mOhm"
+            GUI['line2'] = "Health: "+str(value[0])+" Ah: " \
+                + str(value[1]) + " Wh:"+ str(value[2])
             GUI['bgcolor'] = '"120,244,183"'
             GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
                 +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])

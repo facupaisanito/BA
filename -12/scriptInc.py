@@ -243,7 +243,9 @@ iCharge1 =          '0.5'
 vCharge1 =          '4.2'
 iDischargeTest1 =   '1.8'
 iDischargeTest2 =   '1.0'
-
+lowVoltageLimit =   3000
+tMaxStress =     	4 * 60 * 60 # 4 hr
+maxTimeInit =       	15          # 10 seg
 #
 def stress_test() :
     try:
@@ -262,25 +264,19 @@ def stress_test() :
         if scriptSys.CURRENT > (-iMargin) and scriptSys.VOLTAGE < vMargin :
             scriptSys.final_report("F12",0)
             return
-        # if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeInit:
-        #     slope = scriptSys.get_slope(range(scriptSys.TIME_INIT + 3,scriptSys.TIME))
-        #     if slope['VOLTAGE']  > 80 and slope['CURRENT'] > 180 :
-        #         scriptSys.final_report("F13",0)
-        #         return
+        if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeInit:
+            slope = scriptSys.get_slope(range(scriptSys.TIME_INIT + 3,scriptSys.TIME))
+            if slope['VOLTAGE']  > 80 and slope['CURRENT'] > 180 :
+                scriptSys.final_report("F13",0)
+                return
+        if (scriptSys.TIME - scriptSys.TIME_INIT) >= tMaxStress:
+            scriptSys.final_report("F15",0)
+            return
 
-        actual_time = (scriptSys.TIME - scriptSys.TIME_INIT)
-        if  actual_time >= tTestD :
+        if scriptSys.VOLTAGE <= lowVoltageLimit: #si actula la proteccion cargo la Batery
             evaluate()
             return
-        if  actual_time >= (tTestC- tMargin)and actual_time <(tTestC + tMargin):
-            print "PAUSE"
-            return
-        if  actual_time >=(tTestB - tMargin)and actual_time <(tTestB + tMargin):
-            print "DISCHARGE,"+ iDischargeTest2
-            return
-        if  actual_time >=(tTestA - tMargin)and actual_time <(tTestA + tMargin):
-            print "PAUSE"
-            return
+
         print "RUN"
         return
     except Exception as e:
@@ -297,63 +293,30 @@ factor1 = 10
 factor2 = 1
 factor3 = 1
 factor4 = 15
-slope   = -26
-origin  = 114761
+slope   = 9.2
+origin  = 19158
 def evaluate() :
     try:
-        scriptSys.import_data()
-        flag1 = True
-        flag2 = False
-        flag3 = False
-        flag4 = False
+        capacityVectoAmps   = 0
+        capacityVectorAh    = 0
+        capacityVectoWatt   = 0
         for line in scriptSys.data:
             i = int(line['CURRENT'])
             t = int(line['TIME'])
             if i >= (iDischTest1 - iMar) and i <=(iDischTest1 + iMar) \
-                and flag1 and (t > scriptSys.TIME_INIT):
-                flag1 = False
-                ind =  scriptSys.data.index(line) -1
-                Vi0 =  int(scriptSys.data[ind-1]['VOLTAGE'])
-                Vi0 += int(scriptSys.data[ind-2]['VOLTAGE'])
-                Vi0 += int(scriptSys.data[ind-3]['VOLTAGE'])
-                Vi0 += int(scriptSys.data[ind-4]['VOLTAGE'])
-                Vi0 += int(scriptSys.data[ind-5]['VOLTAGE'])
-                Vi0 /= 5 #promedio de las ultimas 5 muestas antes de la descarga
-                flag2 = True
-            if i >= (- iMar) and i <= iMar and flag2 \
                 and (t > scriptSys.TIME_INIT):
-                flag2 = False
-                ind = scriptSys.data.index(line)
-                Vd1 = Vi0 - int(scriptSys.data[ind+ 6]['VOLTAGE'])
-                Vd2 = Vi0 - int(scriptSys.data[ind+30]['VOLTAGE'])
-                flag3 = True
-            if i >= (iDischTest2 - iMar) and i <=(iDischTest2 + iMar) \
-                and flag3 and (t > scriptSys.TIME_INIT):
-                flag3 = False
-                ind =  scriptSys.data.index(line) -1
-                Vi1 =  int(scriptSys.data[ind-1]['VOLTAGE'])
-                Vi1 += int(scriptSys.data[ind-2]['VOLTAGE'])
-                Vi1 += int(scriptSys.data[ind-3]['VOLTAGE'])
-                Vi1 += int(scriptSys.data[ind-4]['VOLTAGE'])
-                Vi1 += int(scriptSys.data[ind-5]['VOLTAGE'])
-                Vi1 /= 5 #promedio de las ultimas 5 muestas antes de la descarga
-                flag4 = True
-            if i >= (- iMar) and i <= iMar and flag4 \
-                and (t > scriptSys.TIME_INIT):
-                flag4 = False
-                ind = scriptSys.data.index(line)
-                Vd3 = Vi0 - int(scriptSys.data[ind+13]['VOLTAGE'])
-                Vd4 = Vi0 - int(scriptSys.data[ind+19]['VOLTAGE'])
+                capacityVectoAmps += int(line['CURRENT'])
+                capacityVectoWatt += int(line['CURRENT']) * int(line['VOLTAGE'])
+        capacityAh = int(capacityVectoAmps / (1000*3600)) #/1000x mAmp y 3600xHr
+        capacityWh = int(capacityVectoAmps / (1000000*3600))
+        # scriptSys.import_data()
+        result = (scriptSys.TIME - scriptSys.TIME_INIT)
         #regresion lineal
-        result = factor1 * Vd1 + factor2 * Vd2 + factor3 * Vd3 + factor4 * Vd4
         SoH = int((result * slope + origin)/1000)
-        if SoH >= Boundary:
-            scriptSys.final_report("SoHok",SoH)
-        else:
-            scriptSys.final_report("SoHfail",SoH)
+        scriptSys.final_report("sohAW",SoH,capacityAh,capacityWh)
         return
-    except Exception as e:
-        scriptSys.error_report(e,"evaluate()")
+    except:
+        scriptSys.error_report("evaluate()")
 
 
 
