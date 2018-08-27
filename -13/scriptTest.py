@@ -206,10 +206,12 @@ def cond_state():
             return
         if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeInit:
             slope = scriptSys.get_slope(range(scriptSys.TIME_INIT + 3,scriptSys.TIME))
-            if slope['VOLTAGE']  < 80 :
+            if slope['VOLTAGE']  < -180 :
+                print slope
                 scriptSys.final_report("F19",0)
                 return
         if scriptSys.CURRENT >iMargin or scriptSys.CURRENT < (-iMargin):
+            print scriptSys.CURRENT
             scriptSys.final_report("F20",0)
             return
         print "RUN"

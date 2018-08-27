@@ -299,7 +299,7 @@ def end_state():
 ENTRADAS = int(scriptSys.GENERAL['entradas'])
 def testA():
     if ENTRADAS == 1:
-        if scriptSys.VOLTAGE < 4000:
+        if scriptSys.VOLTAGE < 3800:
             charge_state(1)
     if ENTRADAS == 2 or ENTRADAS == 3:
         print "SQUARE,1.0,-1.0,2"
@@ -340,7 +340,10 @@ def testA():
     if ENTRADAS >= 135 and ENTRADAS < 162:
         print "DISCHARGE,1.0"
         sys.exit()
-    if ENTRADAS > 162:
+    if ENTRADAS >= 162 and ENTRADAS < 165:
+        print "PAUSE"
+        sys.exit()
+    if ENTRADAS > 165:
         scriptSys.final_report(0,0)
         sys.exit()
     return
