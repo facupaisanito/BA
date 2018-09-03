@@ -91,7 +91,7 @@ def init_state() :
                 charge_state(0)
                 return
             if scriptSys.VOLTAGE >  umbralVoltLow:
-                stress_state()
+                zmeasure_state()
                 return
         print "RUN"
         return
@@ -205,7 +205,7 @@ def cond_state():
             return
 
         if  ((scriptSys.TIME) - (scriptSys.TIME_INIT)) >= (maxTimeCond-tMargin):
-            stress_state()
+            zmeasure_state()
             return
 
         #condiciones de Fallas:
