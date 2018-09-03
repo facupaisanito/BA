@@ -275,7 +275,7 @@ def stress_test() :
         if  actual_time >= (tTestC3- tMargin)and actual_time <(tTestC3 + tMargin):
             msj = evaluate()
             # scriptSys.sends_msg('Devolvio:'+str(msj))
-            print "RUN"
+            # print "RUN"
             return
         if  actual_time >=(tTestB3 - tMargin)and actual_time <(tTestB3 + tMargin):
             print "PAUSE"
@@ -427,7 +427,7 @@ def evaluate() :
 
         scriptSys.TIME_INIT = scriptSys.TIME
         scriptSys.AUX['testnr'] = str(int(scriptSys.AUX['testnr'])+1)
-
+        print "RUN"
         return
 
     except Exception as e:

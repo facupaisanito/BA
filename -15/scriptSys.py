@@ -148,6 +148,23 @@ def copy_report() :
             myFile.close()
         except:
             print "el copy no funciono csv2"
+        try:
+            with open(PATH + STATION_N + ".log", "rb") as ifile:
+                reader = csv.reader(ifile)
+                dato = []
+                for row in reader:
+                    dato.append(row)
+            ifile.close()
+        except:
+            print "lectura del log fallo"
+        try:
+            myFile = open(file_path +".log", 'w')
+            with myFile:
+                writer = csv.writer(myFile)
+                writer.writerows(dato)
+            myFile.close()
+        except:
+            print "escritura del log fallo"
         #
         return
     except Exception as e:
