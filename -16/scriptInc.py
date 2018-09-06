@@ -219,8 +219,10 @@ def measure_z2() :
 # tTest4  =   180 #tiempo de chequeo e incio de sig etapa
 # tTest5  =   20
 tTest13  =   10  #tiempo de resting
-tTest23  =   270  #tiempo de descarga fuerte 260
+tTest23  =   270  #tiempo de descarga fuerte
+# tTest23  =   30  #tiempo de descarga fuerte 2780
 tTest33  =   20  #tiempo de recuperacion
+# tTest33  =   10  #tiempo de recuperacion 20
 tTest43  =   30 #tiempo de chequeo e incio de sig etapa
 tTest53  =   20
 vMargin =   16
@@ -239,8 +241,9 @@ vCharge1 =          '4.2'
 iDischargeTest1 =   '1.8'
 # iDischargeTest2 =   '0.5'
 iDischargeTest2 =   '1.0'
-lowVoltageLimit =   3000
-tMaxStress =     	4 * 60 * 60 # 4 hr
+lowVoltageLimit =   2500
+tMaxStress =     	2000
+# tMaxStress =     	4 * 60 * 60 # 4 hr
 maxTimeInit =       	15          # 10 seg
 #
 def stress_test() :
@@ -249,23 +252,34 @@ def stress_test() :
             scriptSys.GENERAL['mode'] = 'STRESS'
             scriptSys.TIME_INIT = scriptSys.TIME
             scriptSys.AUX['testnr'] = str(int(scriptSys.AUX['testnr'])+1)
+            scriptSys.AUX['strike'] = 0
+            scriptSys.AUX['strikeh'] = 0
             print "PAUSE"
             return
         #condiciones de Fallas:
-        if scriptSys.VOLTAGE < vMargin : #si actula la proteccion cargo la Batery
-            scriptSys.GENERAL['mode'] = 'CHARGE'
-            scriptSys.TIME_INIT = scriptSys.TIME
-            print "CHARGE,"+ vCharge1 +","+ iCharge1
+        if scriptSys.VOLTAGE < lowVoltageLimit : #si actula la proteccion cargo la Batery
+            scriptSys.AUX['Dropdown voltage T='+ str(scriptSys.TIME)] =scriptSys.VOLTAGE
+            scriptSys.send_msg('Dropdown voltage T='+ str(scriptSys.TIME))
+            scriptSys.final_report("SoHfail",0)
             return
+        # if scriptSys.VOLTAGE < vMargin : #si actula la proteccion cargo la Batery
+        #     scriptSys.GENERAL['mode'] = 'CHARGE'
+        #     scriptSys.TIME_INIT = scriptSys.TIME
+        #     print "CHARGE,"+ vCharge1 +","+ iCharge1
+        #     return
         if scriptSys.CURRENT > (-iMargin) and scriptSys.VOLTAGE < vMargin :
+            scriptSys.AUX['F12'] =scriptSys.CURRENT
             scriptSys.final_report("F12",0)
             return
         if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeInit:
             slope1 = scriptSys.get_slope(range(scriptSys.TIME_INIT + 3,scriptSys.TIME))
             if slope1['VOLTAGE']  > 80 and slope1['CURRENT'] > 180 :
+                scriptSys.AUX['F13 T='+ str(scriptSys.TIME)] =slope1
+                scriptSys.send_msg('F13 T='+ str(scriptSys.TIME))
                 scriptSys.final_report("F13",0)
                 return
         if (scriptSys.TIME - scriptSys.TIME_INIT) >= tMaxStress:
+            scriptSys.AUX['F12'] =(scriptSys.TIME - scriptSys.TIME_INIT)
             scriptSys.final_report("F15",0)
             return
         ######################################
@@ -274,8 +288,6 @@ def stress_test() :
         scriptSys.AUX['actual_time'] = actual_time
         if  actual_time >= (tTestC3- tMargin)and actual_time <(tTestC3 + tMargin):
             msj = evaluate()
-            # scriptSys.sends_msg('Devolvio:'+str(msj))
-            # print "RUN"
             return
         if  actual_time >=(tTestB3 - tMargin)and actual_time <(tTestB3 + tMargin):
             print "PAUSE"
@@ -292,7 +304,7 @@ def stress_test() :
 ##########                  EVALUATE                  ##########
 ################################################################
 #Setup
-Boundary = 75
+Boundary = 70
 Bmargin = 5
 iDischTest1 =   int(-1000 * float(iDischargeTest1))
 iDischTest2 =   int(-1000 * float(iDischargeTest2))
@@ -301,8 +313,8 @@ factor1 = 1
 factor2 = 0
 factor3 = 1
 factor4 = 15
-slope   = -713
-origin  = 120000
+slopeP   = -194
+org  = 90000
 def evaluate() :
     try:
         scriptSys.import_data()
@@ -329,7 +341,7 @@ def evaluate() :
             if s == 3 and flag2 and (t > scriptSys.TIME_INIT):
                 flag2 = False
                 ind = scriptSys.data.index(line)
-                Vd1 = Vi0 - int(scriptSys.data[ind+12]['VOLTAGE'])
+                Vd1 = Vi0 - int(scriptSys.data[ind+0]['VOLTAGE'])
                 Vd2 = Vi0 - int(scriptSys.data[ind+16]['VOLTAGE'])
                 flag3 = True
             if s == 2 and (t > scriptSys.TIME_INIT):
@@ -338,67 +350,136 @@ def evaluate() :
 
 
         #regresion lineal
-        result = factor1 * Vd1 + factor2 * Vd2
-        SoH = int((result * slope + origin)/1000)
-
         testnr = int(scriptSys.AUX['testnr'])
+        if testnr == 1:
+            origin = org
+        if testnr == 2:
+            origin = org - 9000
+        if testnr == 3:
+            origin = org - 10000
+        if testnr == 4:
+            origin = org - 10000
+        if testnr == 5:
+            origin = org - 11000
+        result = factor1 * Vd1 + factor2 * Vd2
+        SoH = int((result * slopeP + origin)/1000)
+
         scriptSys.AUX['Vda'+str(testnr)] =Vi0
         scriptSys.AUX['Vdb'+str(testnr)] =Vd1
         scriptSys.AUX['Vdc'+str(testnr)] =Vd2
         scriptSys.AUX['SoH'+str(testnr)] =SoH
-        scriptSys.send_msg('SoH'+str(testnr)+":"+str(SoH))
+        # scriptSys.send_msg('SoH'+str(testnr)+":"+str(SoH))
 
 
         ######################################################
         #evaluacion de repetir el test
         t0 -= len(var)
         ######################################################
+        Va = 20
+        Vam = 250
         #caso A
         ave = sum(var[5:20])/len(var[5:20])
         t=0
         for  v in var[0:5]:
             t +=1
-            if (ave - v) > 20:
-                scriptSys.AUX['casoA_'+str(t0 + t -1)] =(ave - v)
+            if (ave - v) > Va:
+                scriptSys.AUX['casoA_t'+str(t0 + t -1)] =(ave - v)
+                if int(scriptSys.AUX['strike']) >= 1:
+                    if (t0 + t -1)-int(scriptSys.AUX['striket']) >= 30:
+                        scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                        scriptSys.AUX['striket'] = str(t0 + t -1)
+                else:
+                    scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                    scriptSys.AUX['striket'] = str(t0 + t -1)
                 scriptSys.send_msg('casoA  tiempo:  '+ str(t0 + t -1))
+            if (ave - v) > Vam:
+                scriptSys.AUX['casoAm_t'+str(t0 + t -1)] =(ave - v)
+                scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                scriptSys.send_msg('casoA  tiempo:  '+ str(t0 + t -1))
+                scriptSys.final_report("SoHfail",SoH)
+                return
         ######################################################
+        Vb = 50
+        Vbm = 200
         #caso B
         w=10
         t=5
         for x in range(5+w,len(var)-5-w):
             t +=1
             ave = sum(var[x-w:x])/len(var[x-w:x])
-            if (ave - var[x])> 50 :
-                scriptSys.AUX['casoB_'+str(t0 + t +w)] =(ave - var[x])
+            if (ave - var[x])> Vb :
+                scriptSys.AUX['casoB_t'+str(t0 + t +w)] =(ave - var[x])
                 scriptSys.send_msg('casoB  tiempo:  '+ str(t0 + t +w))
+                if int(scriptSys.AUX['strike']) >= 1:
+                    if (t0 + t -1)-int(scriptSys.AUX['striket']) >= 30:
+                        scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                        scriptSys.AUX['striket'] = str(t0 + t -1)
+                else:
+                    scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                    scriptSys.AUX['striket'] = str(t0 + t -1)
+            if (ave - var[x])> Vbm :
+                scriptSys.AUX['casoBm_t'+str(t0 + t +w)] =(ave - var[x])
+                scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                scriptSys.send_msg('casoB  tiempo:  '+ str(t0 + t +w))
+                scriptSys.final_report("SoHfail",SoH)
+                return
+
         ######################################################
+        Vc = 20
+        Vcm = 200
         #caso C
         ave = sum(var[-25:-5])/len(var[-25:-5])
         t=len(var[:-25])
         for  v in var[-5:]:
             t +=1
-            if (ave - v) > 20:
+            if (ave - v) > Vc:
+                scriptSys.AUX['casoC_t'+str(t0 + t -1)] =(ave - v)
                 scriptSys.send_msg('casoC  tiempo:  '+ str(t0 + t -1))
-                singularidadesC[i].append(t0 + t -1)
+                if int(scriptSys.AUX['strike']) >= 1:
+                    if (t0 + t -1)-int(scriptSys.AUX['striket']) >= 30:
+                        scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                        scriptSys.AUX['striket'] = str(t0 + t -1)
+                else:
+                    scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                    scriptSys.AUX['striket'] = str(t0 + t -1)
+            if (ave - v) > Vcm:
+                scriptSys.AUX['casoCm_t'+str(t0 + t +w)] =(ave - v)
+                scriptSys.send_msg('casoC  tiempo:  '+ str(t0 + t -1))
+                scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                scriptSys.final_report("SoHfail",SoH)
+                return
         ######################################################
+        Vdm = 2800
         #caso D
         t=0
         for  v in var:
-            if v < 2800:
-                scriptSys.AUX['casoD_'+str(t0 + t -1)] =v
+            t +=1
+            if v < Vdm:
+                scriptSys.AUX['casoDm_t'+str(t0 + t -1)] =v
                 scriptSys.send_msg('casoD  tiempo:  '+ str(t0 + t -1))
-                singularidadesC[i].append(t0 + t -1)
+                scriptSys.final_report("SoHfail",SoH)
+                return
+
         ######################################################
         #caso E
         p=0
+        t=0
         for x in range(20,len(var)-10):
             p +=var[x+1]-var[x]
-        scriptSys.AUX['casoE_pendiente'] =p
-        if p > 0 :
-            scriptSys.send_msg('casoE  pendiente:  '+ str(p))
+            t +=1
+        if p > 16 :
+            # scriptSys.send_msg('casoE  pendiente:  '+ str(p))
+            scriptSys.AUX['casoE_t'+str(t0 + t -1)] =p
+            if int(scriptSys.AUX['strike']) >= 1:
+                if (t0 + t -1)-int(scriptSys.AUX['striket']) >= 30:
+                    scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                    scriptSys.AUX['striket'] = str(t0 + t -1)
+            else:
+                scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                scriptSys.AUX['striket'] = str(t0 + t -1)
         ######################################################
         #casoF
-        w=20
+        w=30
         t=15
         for x in range(5+w,len(var)-5-w):
             t +=1
@@ -406,25 +487,47 @@ def evaluate() :
             for y in range(w):
                 p += var[x+y]-var[x+y+1]
                 # print var[x]
-            if p > 0:
-                scriptSys.send_msg('casoF pendiente:  '+ str(p)+ ' tiempo:  '+ str(t0 + t +w))
-                scriptSys.AUX['casoE_pendiente'] =p
-
+            if p > 132:
+                # scriptSys.send_msg('casoF pendiente:  '+ str(p)+ ' tiempo:  '+ str(t0 + t +w))
+                scriptSys.AUX['casoF_t'+str(t0 + t -1)] =p
+                if int(scriptSys.AUX['strike']) >= 1:
+                    if (t0 + t -1)-int(scriptSys.AUX['striket']) >= 30:
+                        scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                        scriptSys.AUX['striket'] = str(t0 + t -1)
+                else:
+                    scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
+                    scriptSys.AUX['striket'] = str(t0 + t -1)
         ######################################################
 
+        #evaluacion de strikes
+        strike = int(scriptSys.AUX['strike'])
+        scriptSys.AUX['strikeh'] = int(scriptSys.AUX['strikeh']) + strike
+        # if strike >= 3 or strikeh >= 3:
+        strikeh = int(scriptSys.AUX['strikeh'])
+        #     scriptSys.final_report("SoHfail",SoH)
+        if strikeh >=3:
+            scriptSys.final_report("SoHfail",SoH)
+            return
         #evaluacion de repetir el test
         if testnr >= 2:
             soh1 = int(scriptSys.AUX['soh'+str(testnr-1)])
-            # soh1 = int(scriptSys.AUX['SoH'+str(testnr-1)])
-            # soh2 = int(scriptSys.AUX['soh2'])
-            if abs(soh1-int(SoH)) < 2:
+            # if abs(soh1-int(SoH)) < 20 and strike == 0:
+            if abs(int(soh1)-int(SoH)) < 10:
                 if  (soh1+int(SoH))/2  > (Boundary + Bmargin):
                     scriptSys.final_report("SoHok",SoH)
+                    return
                 if (soh1+int(SoH))/2  < (Boundary - Bmargin):
                     scriptSys.final_report("SoHfail",SoH)
+                    return
             if testnr >= 5:
-                scriptSys.final_report("SoHfail",SoH)
+                if  (soh1+int(SoH))/2  >= (Boundary):
+                    scriptSys.final_report("SoHok",SoH)
+                    return
+                if (soh1+int(SoH))/2  < (Boundary):
+                    scriptSys.final_report("SoHfail",SoH)
+                    return
 
+        scriptSys.AUX['strike'] = 0
         scriptSys.TIME_INIT = scriptSys.TIME
         scriptSys.AUX['testnr'] = str(int(scriptSys.AUX['testnr'])+1)
         print "RUN"

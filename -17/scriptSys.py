@@ -45,7 +45,6 @@ GENERAL = {}
 GUI = {}
 EVAL = {}
 MENSSAGE = {}
-AUX = {}
 TIME_INIT = 0
 VOLTAGE = 0
 CURRENT = 0
@@ -69,8 +68,6 @@ def ini_Update ():
             config.set('Eval',option,EVAL[option])
         for option in MENSSAGE:
             config.set('Msg',option,MENSSAGE[option])
-        for option in AUX:
-            config.set('AUX',option,AUX[option])
         with open(PATH+STATION_N+'.ini', 'w') as configfile:
             config.write(configfile)
         return
@@ -173,28 +170,14 @@ def copy_report() :
     except Exception as e:
         error_report(e,"copy_report()")
 ################################################################
-##########                  SEND MESSAGE              ##########
-################################################################
-def send_msg(string) :
-    try:
-        MENSSAGE['type'] = "warning"
-        MENSSAGE['time'] = "60"
-        MENSSAGE['txt'] = string
-        # return
-        ini_Update()
-        return
-    except Exception as e:
-        error_report(e,"send_msg()")
-################################################################
 ##########                  FINAL REPORT              ##########
 ################################################################
 def final_report(mode, *value) :
     try:
         if mode == 0 :
-            print "STOP,NTF,75,0"
+            print "STOP,NTF,0,0"
             GUI['line1'] = "Analysis Finished"
-            GUI['line2'] = "Health: ---    Internal Z: " \
-                + str(EVAL['int_z']) + "mOhm"
+            GUI['line2'] = "tiempo: "+ str(GENERAL['time'])
             GUI['bgcolor'] = '"120,244,183"'
             GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
                 +" Z2="+EVAL['int_z2']
@@ -426,7 +409,7 @@ def import_data():
                     temp['CURRENT'] = str(int(row['CURRENT'])+dI)
                     temp['TEMP'] = str(int(row['TEMP'])+dT)
                     data.insert(ind,temp)
-        AUX['line_b'] = str(holes)
+        GENERAL['line_b'] = str(holes)
         return
     except Exception as e:
         error_report(e,"import_data()")
@@ -470,18 +453,9 @@ def get_slope(tLapse):
             dt1 += t[a+1] - t[a]
         tSlope = ( 1000* dt1) / len(t)
         slope = {"VOLTAGE":vSlope ,"CURRENT": iSlope ,"TEMP": tSlope}
-
-        #############
-        # sys.stdout=open("output.txt","w")
-        # print "t:"+str(TIME)
-        # print v
-        # print tLapse
-        # print slope
-        # sys.stdout.close()
-        ##########################
         return slope
     except Exception as e:
-        scriptSys.error_report(e,"get_slope()")
+        scriptSys.error_report(e,"get_data()")
 
 ################################################################
 ##########                  get_data                ##########
@@ -491,9 +465,14 @@ def import_ini( STATION_N ):
         try: config.read(PATH +STATION_N+".ini")
         except : print "no read .ini"
         sections = config.sections()
-
         if not 'General' in sections :
             config.add_section('General')
+        if not 'GUI' in sections :
+            config.add_section('GUI')
+        if not 'Eval' in sections :
+            config.add_section('Eval')
+        if not 'Msg' in sections :
+            config.add_section('Msg')
         options = config.options('General')
         if not 'entradas' in options :
             config.set('General','entradas','0')
@@ -509,9 +488,10 @@ def import_ini( STATION_N ):
             config.set('General','voltage','')
         if not 'vstate' in options :
             config.set('General','vstate','')
-
-        if not 'GUI' in sections :
-            config.add_section('GUI')
+        if not 'line_m' in options :
+            config.set('General','line_m','')
+        if not 'line_b' in options :
+            config.set('General','line_b','')
         options = config.options('GUI')
         if not 'line1' in options :
             config.set('GUI','line1','')
@@ -521,9 +501,6 @@ def import_ini( STATION_N ):
             config.set('GUI','bgcolor','')
         if not 'extra_info' in options :
             config.set('GUI','extra_info','')
-
-        if not 'Eval' in sections :
-            config.add_section('Eval')
         options = config.options('Eval')
         if not 'int_z2' in options :
             config.set('Eval','int_z2','')
@@ -531,9 +508,6 @@ def import_ini( STATION_N ):
             config.set('Eval','int_z1','')
         if not 'health' in options :
             config.set('Eval','health','')
-
-        if not 'Msg' in sections :
-            config.add_section('Msg')
         options = config.options('Msg')
         if not 'type' in options :
             config.set('Msg','type','')
@@ -541,16 +515,6 @@ def import_ini( STATION_N ):
             config.set('Msg','time','')
         if not 'txt' in options :
             config.set('Msg','txt','')
-
-        if not 'AUX' in sections :
-            config.add_section('AUX')
-        options = config.options('AUX')
-        if not 'line_m' in options :
-            config.set('AUX','line_m','')
-        if not 'line_b' in options :
-            config.set('AUX','line_b','')
-        if not 'testnr' in options :
-            config.set('AUX','testnr','0')
         # config.write(config)
         # config.close()
         try:
@@ -567,8 +531,6 @@ def import_ini( STATION_N ):
             EVAL[option]=config.get('Eval',option)
         for option in config.options('Msg'):
             MENSSAGE[option]=config.get('Msg',option)
-        for option in config.options('AUX'):
-            AUX[option]=config.get('AUX',option)
         return
     except Exception as e:
         error_report(e,"import_ini()")
@@ -607,11 +569,10 @@ try:
             voltage += int(last3lines[1]['VOLTAGE'])
             voltage += int(last3lines[2]['VOLTAGE'])
             VOLTAGE = voltage/3
-            # current = int(last3lines[0]['CURRENT'])
-            # current += int(last3lines[1]['CURRENT'])
-            # current += int(last3lines[2]['CURRENT'])
-            # CURRENT = current/3
-            CURRENT += int(last3lines[2]['CURRENT'])
+            current = int(last3lines[0]['CURRENT'])
+            current += int(last3lines[1]['CURRENT'])
+            current += int(last3lines[2]['CURRENT'])
+            CURRENT = current/3
             TIME = int(last3lines[2]['TIME'])
             GENERAL['voltage'] = str(voltage/3)
             #tension instantanea (en promedio de las ultimas 3 mediciones)

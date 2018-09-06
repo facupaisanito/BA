@@ -151,6 +151,23 @@ def copy_report() :
             myFile.close()
         except:
             print "el copy no funciono csv2"
+        try:
+            with open(PATH + STATION_N + ".log", "rb") as ifile:
+                reader = csv.reader(ifile)
+                dato = []
+                for row in reader:
+                    dato.append(row)
+            ifile.close()
+        except:
+            print "lectura del log fallo"
+        try:
+            myFile = open(file_path +".log", 'w')
+            with myFile:
+                writer = csv.writer(myFile)
+                writer.writerows(dato)
+            myFile.close()
+        except:
+            print "escritura del log fallo"
         #
         return
     except Exception as e:
@@ -453,9 +470,18 @@ def get_slope(tLapse):
             dt1 += t[a+1] - t[a]
         tSlope = ( 1000* dt1) / len(t)
         slope = {"VOLTAGE":vSlope ,"CURRENT": iSlope ,"TEMP": tSlope}
+
+        #############
+        # sys.stdout=open("output.txt","w")
+        # print "t:"+str(TIME)
+        # print v
+        # print tLapse
+        # print slope
+        # sys.stdout.close()
+        ##########################
         return slope
     except Exception as e:
-        scriptSys.error_report(e,"get_data()")
+        scriptSys.error_report(e,"get_slope()")
 
 ################################################################
 ##########                  get_data                ##########
@@ -581,10 +607,11 @@ try:
             voltage += int(last3lines[1]['VOLTAGE'])
             voltage += int(last3lines[2]['VOLTAGE'])
             VOLTAGE = voltage/3
-            current = int(last3lines[0]['CURRENT'])
-            current += int(last3lines[1]['CURRENT'])
-            current += int(last3lines[2]['CURRENT'])
-            CURRENT = current/3
+            # current = int(last3lines[0]['CURRENT'])
+            # current += int(last3lines[1]['CURRENT'])
+            # current += int(last3lines[2]['CURRENT'])
+            # CURRENT = current/3
+            CURRENT += int(last3lines[2]['CURRENT'])
             TIME = int(last3lines[2]['TIME'])
             GENERAL['voltage'] = str(voltage/3)
             #tension instantanea (en promedio de las ultimas 3 mediciones)

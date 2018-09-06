@@ -249,11 +249,11 @@ maxTimeInit =       	15          # 10 seg
 #
 def stress_test() :
     try:
-        # if scriptSys.VOLTAGE < vMargin : #si actula la proteccion cargo la Batery
-        #     scriptSys.GENERAL['mode'] = 'CHARGE'
-        #     scriptSys.TIME_INIT = scriptSys.TIME
-        #     print "CHARGE,"+ vCharge1 +","+ iCharge1
-        #     return
+        if scriptSys.VOLTAGE < vMargin : #si actula la proteccion cargo la Batery
+            scriptSys.GENERAL['mode'] = 'CHARGE'
+            scriptSys.TIME_INIT = scriptSys.TIME
+            print "CHARGE,"+ vCharge1 +","+ iCharge1
+            return
         if scriptSys.GENERAL['mode'] != 'STRESS' : #si es llamado por 1
             scriptSys.GENERAL['mode'] = 'STRESS'
             scriptSys.TIME_INIT = scriptSys.TIME
@@ -261,17 +261,17 @@ def stress_test() :
             return
 
         #condiciones de Fallas:
-        # if scriptSys.CURRENT > (-iMargin) and scriptSys.VOLTAGE < vMargin :
-        #     scriptSys.final_report("F12",0)
-        #     return
-        # if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeInit:
-        #     slope = scriptSys.get_slope(range(scriptSys.TIME_INIT + 3,scriptSys.TIME))
-        #     if slope['VOLTAGE']  > 80 and slope['CURRENT'] > 180 :
-        #         scriptSys.final_report("F13",0)
-        #         return
-        # if (scriptSys.TIME - scriptSys.TIME_INIT) >= tMaxStress:
-        #     scriptSys.final_report("F15",0)
-        #     return
+        if scriptSys.CURRENT > (-iMargin) and scriptSys.VOLTAGE < vMargin :
+            scriptSys.final_report("F12",0)
+            return
+        if (scriptSys.TIME - scriptSys.TIME_INIT) >= maxTimeInit:
+            slope = scriptSys.get_slope(range(scriptSys.TIME_INIT + 3,scriptSys.TIME))
+            if slope['VOLTAGE']  > 80 and slope['CURRENT'] > 180 :
+                scriptSys.final_report("F13",0)
+                return
+        if (scriptSys.TIME - scriptSys.TIME_INIT) >= tMaxStress:
+            scriptSys.final_report("F15",0)
+            return
 
         if scriptSys.VOLTAGE <= lowVoltageLimit: #si actula la proteccion cargo la Batery
             evaluate()
