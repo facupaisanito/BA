@@ -328,7 +328,7 @@ def evaluate() :
             i = int(line['CURRENT'])
             t = int(line['TIME'])
             s = int(line['STATUS'])
-            if s == 2 and flag1 and (t > scriptSys.TIME_INIT):
+            if s == 4 and flag1 and (t > scriptSys.TIME_INIT):
                 flag1 = False
                 ind =  scriptSys.data.index(line) -1
                 Vi0 =  int(scriptSys.data[ind-1]['VOLTAGE'])
@@ -344,7 +344,7 @@ def evaluate() :
                 Vd1 = Vi0 - int(scriptSys.data[ind+0]['VOLTAGE'])
                 Vd2 = Vi0 - int(scriptSys.data[ind+16]['VOLTAGE'])
                 flag3 = True
-            if s == 2 and (t > scriptSys.TIME_INIT):
+            if s == 4 and (t > scriptSys.TIME_INIT):
                 var.append(int(line['VOLTAGE']))
                 t0 = int(line['TIME'])
 
