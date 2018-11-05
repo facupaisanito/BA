@@ -259,7 +259,7 @@ def stress_test() :
         #condiciones de Fallas:
         if scriptSys.VOLTAGE < lowVoltageLimit : #si actula la proteccion cargo la Batery
             scriptSys.AUX['Dropdown voltage T='+ str(scriptSys.TIME)] =scriptSys.VOLTAGE
-            scriptSys.send_msg('Dropdown voltage T='+ str(scriptSys.TIME))
+            # scriptSys.send_msg('Dropdown voltage T='+ str(scriptSys.TIME))
             scriptSys.final_report("SoHfail",0)
             return
         # if scriptSys.VOLTAGE < vMargin : #si actula la proteccion cargo la Batery
@@ -275,7 +275,7 @@ def stress_test() :
             slope1 = scriptSys.get_slope(range(scriptSys.TIME_INIT + 3,scriptSys.TIME))
             if slope1['VOLTAGE']  > 80 and slope1['CURRENT'] > 180 :
                 scriptSys.AUX['F13 T='+ str(scriptSys.TIME)] =slope1
-                scriptSys.send_msg('F13 T='+ str(scriptSys.TIME))
+                # scriptSys.send_msg('F13 T='+ str(scriptSys.TIME))
                 scriptSys.final_report("F13",0)
                 return
         if (scriptSys.TIME - scriptSys.TIME_INIT) >= tMaxStress:
@@ -309,11 +309,11 @@ Bmargin = 5
 iDischTest1 =   int(-1000 * float(iDischargeTest1))
 iDischTest2 =   int(-1000 * float(iDischargeTest2))
 iMar =       60
-factor1 = 1
+factor1 = 1             #factores del polinomio ponderado
 factor2 = 0
 factor3 = 1
 factor4 = 15
-slopeP   = -194
+slopeP   = -194         #pendiente y origen de la regresion lineal
 org  = 90000
 def evaluate() :
     try:
@@ -328,7 +328,7 @@ def evaluate() :
             i = int(line['CURRENT'])
             t = int(line['TIME'])
             s = int(line['STATUS'])
-            if s == 2 and flag1 and (t > scriptSys.TIME_INIT):
+            if s == 3 and flag1 and (t > scriptSys.TIME_INIT):
                 flag1 = False
                 ind =  scriptSys.data.index(line) -1
                 Vi0 =  int(scriptSys.data[ind-1]['VOLTAGE'])
@@ -337,16 +337,16 @@ def evaluate() :
                 Vi0 += int(scriptSys.data[ind-4]['VOLTAGE'])
                 Vi0 += int(scriptSys.data[ind-5]['VOLTAGE'])
                 Vi0 /= 5 #promedio de las ultimas 5 muestas antes de la descarga
+                t0 = int(line['TIME']) #tiempo de inicio de la descarga
                 flag2 = True
-            if s == 3 and flag2 and (t > scriptSys.TIME_INIT):
+            if s == 4 and flag2 and (t > scriptSys.TIME_INIT):
                 flag2 = False
                 ind = scriptSys.data.index(line)
                 Vd1 = Vi0 - int(scriptSys.data[ind+0]['VOLTAGE'])
                 Vd2 = Vi0 - int(scriptSys.data[ind+16]['VOLTAGE'])
                 flag3 = True
-            if s == 2 and (t > scriptSys.TIME_INIT):
+            if s == 3 and (t > scriptSys.TIME_INIT): #tomo las tensiones durante la descarga
                 var.append(int(line['VOLTAGE']))
-                t0 = int(line['TIME'])
 
 
         #regresion lineal
@@ -373,9 +373,9 @@ def evaluate() :
 
         ######################################################
         #evaluacion de repetir el test
-        t0 -= len(var)
+        # t0 -= len(var)
         ######################################################
-        Va = 20
+        Va = 20         #pico negativo maximo en la descarga
         Vam = 250
         #caso A
         ave = sum(var[5:20])/len(var[5:20])
@@ -391,16 +391,16 @@ def evaluate() :
                 else:
                     scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
                     scriptSys.AUX['striket'] = str(t0 + t -1)
-                scriptSys.send_msg('casoA  tiempo:  '+ str(t0 + t -1))
+                # scriptSys.send_msg('casoA  tiempo:  '+ str(t0 + t -1))
             if (ave - v) > Vam:
                 scriptSys.AUX['casoAm_t'+str(t0 + t -1)] =(ave - v)
                 scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
-                scriptSys.send_msg('casoA  tiempo:  '+ str(t0 + t -1))
+                # scriptSys.send_msg('casoA  tiempo:  '+ str(t0 + t -1))
                 scriptSys.final_report("SoHfail",SoH)
                 return
         ######################################################
-        Vb = 50
-        Vbm = 200
+        Vb = 50         #caida promedio maxima en la descarga
+        Vbm = 300
         #caso B
         w=10
         t=5
@@ -409,7 +409,7 @@ def evaluate() :
             ave = sum(var[x-w:x])/len(var[x-w:x])
             if (ave - var[x])> Vb :
                 scriptSys.AUX['casoB_t'+str(t0 + t +w)] =(ave - var[x])
-                scriptSys.send_msg('casoB  tiempo:  '+ str(t0 + t +w))
+                # scriptSys.send_msg('casoB  tiempo:  '+ str(t0 + t +w))
                 if int(scriptSys.AUX['strike']) >= 1:
                     if (t0 + t -1)-int(scriptSys.AUX['striket']) >= 30:
                         scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
@@ -420,7 +420,7 @@ def evaluate() :
             if (ave - var[x])> Vbm :
                 scriptSys.AUX['casoBm_t'+str(t0 + t +w)] =(ave - var[x])
                 scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
-                scriptSys.send_msg('casoB  tiempo:  '+ str(t0 + t +w))
+                # scriptSys.send_msg('casoB  tiempo:  '+ str(t0 + t +w))
                 scriptSys.final_report("SoHfail",SoH)
                 return
 
@@ -434,7 +434,7 @@ def evaluate() :
             t +=1
             if (ave - v) > Vc:
                 scriptSys.AUX['casoC_t'+str(t0 + t -1)] =(ave - v)
-                scriptSys.send_msg('casoC  tiempo:  '+ str(t0 + t -1))
+                # scriptSys.send_msg('casoC  tiempo:  '+ str(t0 + t -1))
                 if int(scriptSys.AUX['strike']) >= 1:
                     if (t0 + t -1)-int(scriptSys.AUX['striket']) >= 30:
                         scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
@@ -444,25 +444,25 @@ def evaluate() :
                     scriptSys.AUX['striket'] = str(t0 + t -1)
             if (ave - v) > Vcm:
                 scriptSys.AUX['casoCm_t'+str(t0 + t +w)] =(ave - v)
-                scriptSys.send_msg('casoC  tiempo:  '+ str(t0 + t -1))
+                # scriptSys.send_msg('casoC  tiempo:  '+ str(t0 + t -1))
                 scriptSys.AUX['strike'] = str(int(scriptSys.AUX['strike'])+1)
                 scriptSys.final_report("SoHfail",SoH)
                 return
         ######################################################
-        Vdm = 2800
+        Vdm = 2800      #tension de caida maxima
         #caso D
         t=0
         for  v in var:
             t +=1
             if v < Vdm:
                 scriptSys.AUX['casoDm_t'+str(t0 + t -1)] =v
-                scriptSys.send_msg('casoD  tiempo:  '+ str(t0 + t -1))
+                # scriptSys.send_msg('casoD  tiempo:  '+ str(t0 + t -1))
                 scriptSys.final_report("SoHfail",SoH)
                 return
 
         ######################################################
         #caso E
-        p=0
+        p=0         #evaluacion de pendiente positiva
         t=0
         for x in range(20,len(var)-10):
             p +=var[x+1]-var[x]
@@ -479,7 +479,7 @@ def evaluate() :
                 scriptSys.AUX['striket'] = str(t0 + t -1)
         ######################################################
         #casoF
-        w=30
+        w=30            #evaluacion de caida de promedio
         t=15
         for x in range(5+w,len(var)-5-w):
             t +=1

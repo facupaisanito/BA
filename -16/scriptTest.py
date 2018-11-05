@@ -43,7 +43,7 @@ umbralCurrentTarget =   300
 umbralVoltHigh =    	umbralVoltTarget
 umbralVoltLow =     	3800
 umbralVolt =        	umbralVoltTarget * 0.03
-maxTimeInit =       	20          # 10 seg
+maxTimeInit =       	10          # 10 seg
 maxTimeTest =           2 * 60 * 60 #  hr
 # maxTimeTest =           2000 #  hr
 maxTimeDischarge =  	30 * 60     # 30 min
@@ -153,11 +153,11 @@ def charge_state(number) :
                 scriptSys.AUX['F06'] =scriptSys.TIME
                 scriptSys.final_report("F06",0)
                 return
-            if slope['VOLTAGE'] > 0 and slope['CURRENT'] < 0 :
-                scriptSys.AUX['F07t'] =slope['CURRENT']
-                scriptSys.AUX['F04'] =scriptSys.TIME
-                scriptSys.final_report("F07",0)
-                return
+            # if slope['VOLTAGE'] > 0 and slope['CURRENT'] < 0 :
+            #     scriptSys.AUX['F07'] =slope['CURRENT']
+            #     scriptSys.AUX['F07t'] =scriptSys.TIME
+            #     scriptSys.final_report("F07",0)
+            #     return
             if slope['VOLTAGE'] < 0 :
                 scriptSys.AUX['F08t'] =slope['VOLTAGE']
                 scriptSys.AUX['F04'] =scriptSys.TIME

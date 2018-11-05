@@ -243,7 +243,7 @@ iCharge1 =          '0.5'
 vCharge1 =          '4.2'
 iDischargeTest1 =   '1.8'
 iDischargeTest2 =   '1.0'
-lowVoltageLimit =   3000
+lowVoltageLimit =   3000  #limite inferior al q falla por tension
 tMaxStress =     	4 * 60 * 60 # 4 hr
 maxTimeInit =       	15          # 10 seg
 #
@@ -285,10 +285,10 @@ def stress_test() :
 ##########                  EVALUATE                  ##########
 ################################################################
 #Setup
-Boundary = 75
+Boundary = 73       #soH limite
 iDischTest1 =   int(-1000 * float(iDischargeTest1))
 iDischTest2 =   int(-1000 * float(iDischargeTest2))
-iMar =       60
+iMar =       60 #Margen de corriente
 factor1 = 10
 factor2 = 1
 factor3 = 1

@@ -73,6 +73,8 @@ def ini_Update ():
             config.set('AUX',option,AUX[option])
         with open(PATH+STATION_N+'.ini', 'w') as configfile:
             config.write(configfile)
+            configfile.close()
+
         return
     except Exception as e:
         # print "STOP,FAIL,0,0"
@@ -252,7 +254,7 @@ def final_report(mode, *value) :
             GUI['extra_info'] = " Z1="+EVAL['int_z1'] \
                 +" Z2="+EVAL['int_z2']+" SoH=" + str(value[0])
 
-        if mode == "F01" :
+        if mode == "F01" : #Presencia de corriente en estado de reposo
             print "STOP,FAIL,0,0"
             GUI['line1'] = "Analysis Fail"
             GUI['line2'] = "Error n F01"
@@ -264,7 +266,7 @@ def final_report(mode, *value) :
             GUI['line2'] = "Error n F02"
             GUI['bgcolor'] = '"244,0,0"'
             GUI['extra_info'] = "none"
-        if mode == "F03" :
+        if mode == "F03" : #En charge_state no toma caarga o V<Vcharge-100mv
             print "STOP,0,0,0"
             GUI['line1'] = "Analysis Fail"
             GUI['line2'] = "Error n F03"
@@ -288,7 +290,7 @@ def final_report(mode, *value) :
             GUI['line2'] = "Error n F06"
             GUI['bgcolor'] = '"244,0,0"'
             GUI['extra_info'] = "none"
-        if mode == "F07" :
+        if mode == "F07" : #charge_state Pendiente tension positiva y corriente negativo
             print "STOP,FAIL,0,0"
             GUI['line1'] = "Analysis Fail"
             GUI['line2'] = "Error n F07"
@@ -378,7 +380,7 @@ def final_report(mode, *value) :
             GUI['line2'] = "Error n F21"
             GUI['bgcolor'] = '"244,0,0"'
             GUI['extra_info'] = "none"
-        if mode == "F22" :
+        if mode == "F22" : #bateria desconectada
             print "STOP,FAIL,0,0"
             GUI['line1'] = "Analysis Fail"
             GUI['line2'] = "Battery disconected"
@@ -482,14 +484,15 @@ def get_slope(tLapse):
         return slope
     except Exception as e:
         scriptSys.error_report(e,"get_slope()")
-
 ################################################################
 ##########                  get_data                ##########
 ################################################################
 def import_ini( STATION_N ):
     try:
         try: config.read(PATH +STATION_N+".ini")
-        except : print "no read .ini"
+        except Exception as e:
+            print "config.read(configfile) ERROR"
+            print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
         sections = config.sections()
 
         if not 'General' in sections :
@@ -554,8 +557,9 @@ def import_ini( STATION_N ):
         # config.write(config)
         # config.close()
         try:
-            with open(PATH + STATION_N + '.ini', 'wb') as configfile:
+            with open(PATH + STATION_N + '.ini', 'w') as configfile:
                 config.write(configfile)
+                configfile.close()
         except Exception as e:
             print "config.write(configfile) ERROR"
             print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
@@ -572,7 +576,6 @@ def import_ini( STATION_N ):
         return
     except Exception as e:
         error_report(e,"import_ini()")
-
 #####################################################
 #####################################################
 ##      Abro el stXX.ini                           ##
