@@ -6,9 +6,3 @@
 *.html
 
 \.DS_Store
-
-scriptInc\.py
-
-scriptTest\.py
-
-scriptSys\.py

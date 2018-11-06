@@ -73,7 +73,7 @@ def ini_Update ():
             config.set('AUX',option,AUX[option])
         with open(PATH+STATION_N+'.ini', 'w') as configfile:
             config.write(configfile)
-        configfile.close()
+            configfile.close()
 
         return
     except Exception as e:
@@ -494,98 +494,72 @@ def import_ini( STATION_N ):
             print "config.read(configfile) ERROR"
             print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
         sections = config.sections()
-        flag_write = False
+
         if not 'General' in sections :
-            flag_write = True
             config.add_section('General')
         options = config.options('General')
         if not 'entradas' in options :
-            flag_write = True
             config.set('General','entradas','0')
         if not 'time' in options :
-            flag_write = True
             config.set('General','time','')
         if not 'machinestatus' in options :
-            flag_write = True
             config.set('General','machinestatus','')
         if not 'mode' in options :
-            flag_write = True
             config.set('General','mode','INIT')
         if not 'time_init' in options :
-            flag_write = True
             config.set('General','time_init','0')
         if not 'voltage' in options :
-            flag_write = True
             config.set('General','voltage','')
         if not 'vstate' in options :
-            flag_write = True
             config.set('General','vstate','')
 
         if not 'GUI' in sections :
-            flag_write = True
             config.add_section('GUI')
         options = config.options('GUI')
         if not 'line1' in options :
-            flag_write = True
             config.set('GUI','line1','')
         if not 'line2' in options :
-            flag_write = True
             config.set('GUI','line2','')
         if not 'bgcolor' in options :
-            flag_write = True
             config.set('GUI','bgcolor','')
         if not 'extra_info' in options :
-            flag_write = True
             config.set('GUI','extra_info','')
 
         if not 'Eval' in sections :
-            flag_write = True
             config.add_section('Eval')
         options = config.options('Eval')
         if not 'int_z2' in options :
-            flag_write = True
             config.set('Eval','int_z2','')
         if not 'int_z1' in options :
-            flag_write = True
             config.set('Eval','int_z1','')
         if not 'health' in options :
-            flag_write = True
             config.set('Eval','health','')
 
         if not 'Msg' in sections :
-            flag_write = True
             config.add_section('Msg')
         options = config.options('Msg')
         if not 'type' in options :
-            flag_write = True
             config.set('Msg','type','')
         if not 'time' in options :
-            flag_write = True
             config.set('Msg','time','')
         if not 'txt' in options :
-            flag_write = True
             config.set('Msg','txt','')
 
         if not 'AUX' in sections :
-            flag_write = True
             config.add_section('AUX')
         options = config.options('AUX')
         if not 'line_m' in options :
-            flag_write = True
             config.set('AUX','line_m','')
         if not 'line_b' in options :
-            flag_write = True
             config.set('AUX','line_b','')
         if not 'testnr' in options :
-            flag_write = True
             config.set('AUX','testnr','0')
         # config.write(config)
         # config.close()
         try:
-            if (flag_write):
-                with open(PATH + STATION_N + '.ini', 'w') as configfile:
-                    config.write(configfile)
-                    configfile.close()
+            with open(PATH + STATION_N + '.ini', 'w') as configfile:
+                config.write(configfile)
+                configfile.close()
         except Exception as e:
             print "config.write(configfile) ERROR"
             print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
