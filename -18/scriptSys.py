@@ -37,7 +37,7 @@ for px in sys.argv:
         STATION_N = sys.argv[idx]
         sys.argv.pop(idx) # remove value
 
-config = ConfigParser.ConfigParser()
+config = ConfigParser.SafeConfigParser()
 
 PATH = 'data/st'
 if DEBUG_MODE : PATH = '../../data/st'
@@ -493,86 +493,83 @@ def import_ini( STATION_N ):
         except Exception as e:
             print "config.read(configfile) ERROR"
             print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
-        sections = config.sections()
+        # sections = config.sections()
+        try:
+            for option in config.options('General'):
+                GENERAL[option]=config.get('General',option)
+            for option in config.options('GUI'):
+                GUI[option]=config.get('GUI',option)
+            for option in config.options('Eval'):
+                EVAL[option]=config.get('Eval',option)
+            for option in config.options('Msg'):
+                MENSSAGE[option]=config.get('Msg',option)
+            for option in config.options('AUX'):
+                AUX[option]=config.get('AUX',option)
+        except:
+            if not config.has_section('General'):
+                config.add_section('General')
+            if not config.has_option('General', 'entradas'):
+                config.set('General','entradas','0')
+            if not config.has_option('General', 'time'):
+                config.set('General','time','')
+            if not config.has_option('General', 'machinestatus'):
+                config.set('General','machinestatus','')
+            if not config.has_option('General', 'mode'):
+                config.set('General','mode','INIT')
+            if not config.has_option('General', 'time_init'):
+                config.set('General','time_init','0')
+            if not config.has_option('General', 'voltage'):
+                config.set('General','voltage','')
+            if not config.has_option('General', 'vstate'):
+                config.set('General','vstate','')
 
-        if not 'General' in sections :
-            config.add_section('General')
-        options = config.options('General')
-        if not 'entradas' in options :
-            config.set('General','entradas','0')
-        if not 'time' in options :
-            config.set('General','time','')
-        if not 'machinestatus' in options :
-            config.set('General','machinestatus','')
-        if not 'mode' in options :
-            config.set('General','mode','INIT')
-        if not 'time_init' in options :
-            config.set('General','time_init','0')
-        if not 'voltage' in options :
-            config.set('General','voltage','')
-        if not 'vstate' in options :
-            config.set('General','vstate','')
+            if not config.has_section('GUI'):
+                config.add_section('GUI')
+            if not config.has_option('GUI', 'line1'):
+                config.set('GUI','line1','')
+            if not config.has_option('GUI', 'line2'):
+                config.set('GUI','line2','')
+            if not config.has_option('GUI', 'bgcolor'):
+                config.set('GUI','bgcolor','')
+            if not config.has_option('GUI', 'extra_info'):
+                config.set('GUI','extra_info','')
 
-        if not 'GUI' in sections :
-            config.add_section('GUI')
-        options = config.options('GUI')
-        if not 'line1' in options :
-            config.set('GUI','line1','')
-        if not 'line2' in options :
-            config.set('GUI','line2','')
-        if not 'bgcolor' in options :
-            config.set('GUI','bgcolor','')
-        if not 'extra_info' in options :
-            config.set('GUI','extra_info','')
+            if not config.has_section('Eval'):
+                config.add_section('Eval')
+            if not config.has_option('Eval', 'int_z2'):
+                config.set('Eval','int_z2','')
+            if not config.has_option('Eval', 'int_z1'):
+                config.set('Eval','int_z1','')
+            if not config.has_option('Eval', 'health'):
+                config.set('Eval','health','')
 
-        if not 'Eval' in sections :
-            config.add_section('Eval')
-        options = config.options('Eval')
-        if not 'int_z2' in options :
-            config.set('Eval','int_z2','')
-        if not 'int_z1' in options :
-            config.set('Eval','int_z1','')
-        if not 'health' in options :
-            config.set('Eval','health','')
+            if not config.has_section('Msg'):
+                config.add_section('Msg')
+            if not config.has_option('Msg', 'type'):
+                config.set('Msg','type','')
+            if not config.has_option('Msg', 'time'):
+                config.set('Msg','time','')
+            if not config.has_option('Msg', 'txt'):
+                config.set('Msg','txt','')
 
-        if not 'Msg' in sections :
-            config.add_section('Msg')
-        options = config.options('Msg')
-        if not 'type' in options :
-            config.set('Msg','type','')
-        if not 'time' in options :
-            config.set('Msg','time','')
-        if not 'txt' in options :
-            config.set('Msg','txt','')
-
-        if not 'AUX' in sections :
-            config.add_section('AUX')
-        options = config.options('AUX')
-        if not 'line_m' in options :
-            config.set('AUX','line_m','')
-        if not 'line_b' in options :
-            config.set('AUX','line_b','')
-        if not 'testnr' in options :
-            config.set('AUX','testnr','0')
+            if not config.has_section('AUX'):
+                config.add_section('AUX')
+            if not config.has_option('AUX', 'line_m'):
+                config.set('AUX','line_m','')
+            if not config.has_option('AUX', 'line_b'):
+                config.set('AUX','line_b','')
+            if not config.has_option('AUX', 'testnr'):
+                config.set('AUX','testnr','0')
+            try:
+                with open(PATH + STATION_N + '.ini', 'w') as configfile:
+                    config.write(configfile)
+                    configfile.close()
+            except Exception as e:
+                print "config.write(configfile) ERROR"
+                print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
         # config.write(config)
         # config.close()
-        try:
-            with open(PATH + STATION_N + '.ini', 'w') as configfile:
-                config.write(configfile)
-                configfile.close()
-        except Exception as e:
-            print "config.write(configfile) ERROR"
-            print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
-        for option in config.options('General'):
-            GENERAL[option]=config.get('General',option)
-        for option in config.options('GUI'):
-            GUI[option]=config.get('GUI',option)
-        for option in config.options('Eval'):
-            EVAL[option]=config.get('Eval',option)
-        for option in config.options('Msg'):
-            MENSSAGE[option]=config.get('Msg',option)
-        for option in config.options('AUX'):
-            AUX[option]=config.get('AUX',option)
+
         return
     except Exception as e:
         error_report(e,"import_ini()")
