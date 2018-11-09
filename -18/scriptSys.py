@@ -62,15 +62,15 @@ def ini_Update ():
         GENERAL['time_init'] = str(TIME_INIT)
         GENERAL['voltage'] = str(VOLTAGE)
         for option in GENERAL:
-            config.set('General',option,GENERAL[option])
+            config.set('General',option,str(GENERAL[option]))
         for option in GUI:
-            config.set('GUI',option,GUI[option])
+            config.set('GUI',option,str(GUI[option]))
         for option in EVAL:
-            config.set('Eval',option,EVAL[option])
+            config.set('Eval',option,str(EVAL[option]))
         for option in MENSSAGE:
-            config.set('Msg',option,MENSSAGE[option])
+            config.set('Msg',option,str(MENSSAGE[option]))
         for option in AUX:
-            config.set('AUX',option,AUX[option])
+            config.set('AUX',option,str(AUX[option]))
         with open(PATH+STATION_N+'.ini', 'w') as configfile:
             config.write(configfile)
             configfile.close()
